@@ -30,7 +30,7 @@ end
 
 namespace :integration do
   task :test do
-    success = system ("cd test && go test -v ./ -timeout 20m")
+    success = system ("cd test && go test -v ./ -timeout 30m -parallel 1")
     if not success 
       raise "ERROR: Go test failed!\n".red
     end

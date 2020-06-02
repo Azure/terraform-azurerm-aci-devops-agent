@@ -15,11 +15,11 @@ import (
 	"github.com/microsoft/azure-devops-go-api/azuredevops/taskagent"
 )
 
-// This function tests the deployment of Azure DevOps Linux and Windows agents
-func TestDeployAzureDevOpsLinuxAndWindowsAgents(t *testing.T) {
+// This function tests the deployment of Azure DevOps Linux agents
+func TestDeployAzureDevOpsLinuxAgents(t *testing.T) {
 	t.Parallel()
 
-	fixtureFolder := "./fixture"
+	fixtureFolder := "./fixture/linux-agents"
 
 	// generate a random suffix for the test
 	rand.Seed(time.Now().UnixNano())

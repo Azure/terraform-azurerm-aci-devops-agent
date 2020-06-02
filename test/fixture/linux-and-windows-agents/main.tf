@@ -7,6 +7,8 @@ module "aci-devops-agent" {
     docker_image      = "jcorioland/aci-devops-agent"
     docker_tag        = "0.2-linux"
     agent_pool_name   = var.linux_azure_devops_pool_name
+    cpu               = 1
+    memory            = 4
   }
   windows_agents_configuration = {
     agent_name_prefix = "windows-agent"
@@ -14,6 +16,8 @@ module "aci-devops-agent" {
     docker_image      = "jcorioland/aci-devops-agent"
     docker_tag        = "0.2-win"
     agent_pool_name   = var.windows_azure_devops_pool_name
+    cpu               = 1
+    memory            = 4
   }
   resource_group_name                = "rg-aci-devops-agents-we"
   location                           = "westeurope"

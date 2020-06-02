@@ -38,6 +38,8 @@ module "aci-devops-agent" {
     docker_image      = var.agent_docker_image
     docker_tag        = var.agent_docker_tag
     agent_pool_name   = var.azure_devops_pool_name
+    cpu               = 1
+    memory            = 4
   }
   resource_group_name                = "rg-terraform-azure-devops-agents-e2e-tests-${var.random_suffix}"
   location                           = var.location

@@ -176,7 +176,7 @@ func TestDeployAzureDevOpsLinuxAndWindowsAgents(t *testing.T) {
 
 	// create the Windows agents pool
 	defer deleteAzureDevOpsAgentTestPool(windowsTestPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
-	err := createAzureDevOpsAgentTestPool(windowsTestPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
+	err = createAzureDevOpsAgentTestPool(windowsTestPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
 	if err != nil {
 		t.Fatalf("Cannot create Azure DevOps Linux agent pool for the test: %v", err)
 	}

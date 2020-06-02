@@ -16,7 +16,7 @@ variable azure_devops_personal_access_token {
 variable location {
   type = string
   description = "The Azure location to use"
-  default = "westeurope"
+  default = "westus"
 }
 
 variable agent_docker_image {

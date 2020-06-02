@@ -153,19 +153,32 @@ func TestDeployAzureDevOpsLinuxAndWindowsAgents(t *testing.T) {
 	randomSuffix := strconv.Itoa(randomInt)
 	os.Setenv("TF_VAR_random_suffix", randomSuffix)
 
-	// randomize the agent pool name
-	devopsPoolName := os.Getenv("TF_VAR_azure_devops_pool_name")
-	testPoolName := fmt.Sprintf("%s-%s", devopsPoolName, randomSuffix)
-	os.Setenv("TF_VAR_azure_devops_pool_name", testPoolName)
+	// randomize the Linux agent pool name
+	linuxDevopsPoolName := os.Getenv("TF_VAR_linux_azure_devops_pool_name")
+	linuxTestPoolName := fmt.Sprintf("%s-%s", linuxDevopsPoolName, randomSuffix)
+	os.Setenv("TF_VAR_linux_azure_devops_pool_name", linuxTestPoolName)
+
+	// randomize the Windows agent pool name
+	windowsDevopsPoolName := os.Getenv("TF_VAR_windows_azure_devops_pool_name")
+	windowsTestPoolName := fmt.Sprintf("%s-%s", windowsDevopsPoolName, randomSuffix)
+	os.Setenv("TF_VAR_windows_azure_devops_pool_name", windowsTestPoolName)
 
 	devopsOrganizationName := os.Getenv("TF_VAR_azure_devops_org_name")
 	devopsPersonalAccessToken := os.Getenv("TF_VAR_azure_devops_personal_access_token")
 	devopsOrganizationURL := fmt.Sprintf("https://dev.azure.com/%s", devopsOrganizationName)
 
-	defer deleteAzureDevOpsAgentTestPool(testPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
-	err := createAzureDevOpsAgentTestPool(testPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
+	// create the Linux agents pool
+	defer deleteAzureDevOpsAgentTestPool(linuxTestPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
+	err := createAzureDevOpsAgentTestPool(linuxTestPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
 	if err != nil {
-		t.Fatalf("Cannot create Azure DevOps agent pool for the test: %v", err)
+		t.Fatalf("Cannot create Azure DevOps Linux agent pool for the test: %v", err)
+	}
+
+	// create the Windows agents pool
+	defer deleteAzureDevOpsAgentTestPool(windowsTestPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
+	err := createAzureDevOpsAgentTestPool(windowsTestPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
+	if err != nil {
+		t.Fatalf("Cannot create Azure DevOps Linux agent pool for the test: %v", err)
 	}
 
 	// Deploy the example
@@ -181,19 +194,31 @@ func TestDeployAzureDevOpsLinuxAndWindowsAgents(t *testing.T) {
 
 	// Check whether the length of output meets the requirement
 	test_structure.RunTestStage(t, "validate", func() {
-		// add wait time for ACI to get connectivity
-		time.Sleep(45 * time.Second)
+		// add wait time for ACI to get connectivity + pull Windows image
+		time.Sleep(150 * time.Second)
 
-		// ensure deployment was successful
-		expectedAgentsCount := 2
-		actualAgentsCount, err := getAgentsCount(testPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
+		// ensure deployment was successful for Linux agents
+		expectedLinuxAgentsCount := 2
+		actualLinuxAgentsCount, err := getAgentsCount(linuxTestPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
 
 		if err != nil {
-			t.Fatalf("Cannot retrieve the number of agents that were deployed: %v", err)
+			t.Fatalf("Cannot retrieve the number of Linux agents that were deployed: %v", err)
 		}
 
-		if expectedAgentsCount != actualAgentsCount {
-			t.Fatalf("Test failed. Expected number of agents is %d. Actual number of agents is %d", expectedAgentsCount, actualAgentsCount)
+		if expectedLinuxAgentsCount != actualLinuxAgentsCount {
+			t.Fatalf("Test failed. Expected number of Linux agents is %d. Actual number of Linux agents is %d", expectedLinuxAgentsCount, actualLinuxAgentsCount)
+		}
+
+		// ensure deployment was successful for Windows agents
+		expectedWindowsAgentsCount := 2
+		actualWindowsAgentsCount, err := getAgentsCount(windowsTestPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
+
+		if err != nil {
+			t.Fatalf("Cannot retrieve the number of Windows agents that were deployed: %v", err)
+		}
+
+		if expectedWindowsAgentsCount != actualWindowsAgentsCount {
+			t.Fatalf("Test failed. Expected number of Windows agents is %d. Actual number of Windows agents is %d", expectedWindowsAgentsCount, actualWindowsAgentsCount)
 		}
 	})
 

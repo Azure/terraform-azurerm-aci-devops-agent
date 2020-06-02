@@ -82,7 +82,7 @@ func TestDeployAzureDevOpsLinuxAgents(t *testing.T) {
 func TestDeployAzureDevOpsLinuxAgentsInVirtualNetwork(t *testing.T) {
 	t.Parallel()
 
-	fixtureFolder := "./fixture/linux-agents-net"
+	fixtureFolder := "./fixture/linux-agents-vnet"
 
 	// generate a random suffix for the test
 	rand.Seed(time.Now().UnixNano())

@@ -51,8 +51,8 @@ resource "azurerm_container_group" "linux-container-group" {
   container {
     name   = "${var.linux_agents_configuration.agent_name_prefix}-${count.index}"
     image  = "${var.linux_agents_configuration.docker_image}:${var.linux_agents_configuration.docker_tag}"
-    cpu    = "1"
-    memory = "7"
+    cpu    = var.linux_agents_configuration.cpu
+    memory = var.linux_agents_configuration.memory
 
     # this field seems to be mandatory (error happens if not there). See https://github.com/terraform-providers/terraform-provider-azurerm/issues/1697#issuecomment-608669422
     ports {
@@ -99,8 +99,8 @@ resource "azurerm_container_group" "windows-container-group" {
   container {
     name   = "${var.windows_agents_configuration.agent_name_prefix}-${count.index}"
     image  = "${var.windows_agents_configuration.docker_image}:${var.windows_agents_configuration.docker_tag}"
-    cpu    = "1"
-    memory = "7"
+    cpu    = var.windows_agents_configuration.cpu
+    memory = var.windows_agents_configuration.memory
 
     # this field seems to be mandatory (error happens if not there). See https://github.com/terraform-providers/terraform-provider-azurerm/issues/1697#issuecomment-608669422
     ports {

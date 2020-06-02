@@ -48,7 +48,9 @@ variable linux_agents_configuration {
     docker_image      = string,
     docker_tag        = string,
     agent_name_prefix = string,
-    agent_pool_name   = string
+    agent_pool_name   = string,
+    cpu               = string,
+    memory            = string
   })
   description = "(Optional) The configuration of the Linux agents to deploy"
   default = {
@@ -56,7 +58,9 @@ variable linux_agents_configuration {
     docker_image      = "",
     docker_tag        = "",
     agent_name_prefix = "",
-    agent_pool_name   = ""
+    agent_pool_name   = "",
+    cpu               = "1",
+    memory            = "2"
   }
 }
 
@@ -66,7 +70,9 @@ variable windows_agents_configuration {
     docker_image      = string,
     docker_tag        = string,
     agent_name_prefix = string,
-    agent_pool_name   = string
+    agent_pool_name   = string,
+    cpu               = string,
+    memory            = string
   })
   description = "(Optional) The configuration of the Windows agents to deploy"
   default = {
@@ -74,6 +80,8 @@ variable windows_agents_configuration {
     docker_image      = "",
     docker_tag        = "",
     agent_name_prefix = "",
-    agent_pool_name   = ""
+    agent_pool_name   = "",
+    cpu               = "1",
+    memory            = "2"
   }
 }

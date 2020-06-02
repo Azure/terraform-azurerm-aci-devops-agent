@@ -153,14 +153,12 @@ func TestDeployAzureDevOpsLinuxAndWindowsAgents(t *testing.T) {
 	randomSuffix := strconv.Itoa(randomInt)
 	os.Setenv("TF_VAR_random_suffix", randomSuffix)
 
-	// randomize the Linux agent pool name
-	linuxDevopsPoolName := os.Getenv("TF_VAR_linux_azure_devops_pool_name")
-	linuxTestPoolName := fmt.Sprintf("%s-%s", linuxDevopsPoolName, randomSuffix)
+	// create random Linux agent pool name
+	linuxTestPoolName := fmt.Sprintf("linux-e2e-agents-%s", randomSuffix)
 	os.Setenv("TF_VAR_linux_azure_devops_pool_name", linuxTestPoolName)
 
-	// randomize the Windows agent pool name
-	windowsDevopsPoolName := os.Getenv("TF_VAR_windows_azure_devops_pool_name")
-	windowsTestPoolName := fmt.Sprintf("%s-%s", windowsDevopsPoolName, randomSuffix)
+	// create random Windows agent pool name
+	windowsTestPoolName := fmt.Sprintf("windows-e2e-agents-%s", randomSuffix)
 	os.Setenv("TF_VAR_windows_azure_devops_pool_name", windowsTestPoolName)
 
 	devopsOrganizationName := os.Getenv("TF_VAR_azure_devops_org_name")

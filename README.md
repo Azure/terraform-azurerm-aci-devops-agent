@@ -1,4 +1,4 @@
-# Run Azure Pipelines in Azure Container Instances
+# terraform-azurerm-aci-devops-agent
 
 This repository contains a Terraform module that helps you to deploy [Azure DevOps self-hosted agents](https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/agents?view=azure-devops&tabs=browser#install) running on Azure Container Instance.
 
@@ -6,23 +6,34 @@ You can choose to deploy Linux or Windows agents, provide custom Docker images f
 
 [![Build Status](https://dev.azure.com/juliencorioland/Azure%20DevOps%20Agents%20ACI/_apis/build/status/terraform-azure-devops-agent-aci-e2e?branchName=master)](https://dev.azure.com/juliencorioland/Azure%20DevOps%20Agents%20ACI/_build/latest?definitionId=1&branchName=master)
 
-## How-to
+## How-to use this module to deploy Azure DevOps agents
 
 ### Build the Docker images
 
 This module requires that you build your own Linux and/or Windows Docker images, to run the Azure DevOps agents. The [docker](docker/README.md) contains Dockerfile and instructions for both.
 
-### Use the Terraform Module
+### Create an Azure DevOps agent pool and personal access token
 
-#### Azure DevOps Agents ACI Terraform module - Deploy Linux Agents
+Before running this module, you need to [create an agent pool in your Azure DevOps organization](https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/pools-queues?view=azure-devops&tabs=yaml%2Cbrowser#creating-agent-pools) and a [personal access token](https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/v2-linux?view=azure-devops#permissions) that it authorized to manage this agent pool.
+
+This module has 3 variables related to Azure DevOps:
+
+- `azure_devops_org_name`: the name of your Azure DevOps organization (if you are connecting to `https://dev.azure.com/helloworld`, then `helloworld` is your organization name)
+- `azure_devops_pool_name`: the name of the agent pool that you have created
+- `azure_devops_personal_access_token`: the personal access token that you have generated
+
+### Terraform ACI DevOps Agents usage
+
+#### Terraform ACI DevOps Agents - Deploy Linux Agents
 
 The configuration below can be used to deploy Linux DevOps agents using Azure Container Instances.
 
 ```hcl
 module "aci-devops-agent" {
-  source                  = "../../"
-  enable_vnet_integration = false
-  create_resource_group   = true
+  source                     = "Azure/aci-devops-agent/azurerm"
+  enable_vnet_integration    = false
+  create_resource_group      = true
+
   linux_agents_configuration = {
     agent_name_prefix = "linux-agent"
     count             = 2,
@@ -31,6 +42,7 @@ module "aci-devops-agent" {
     cpu               = 1
     memory            = 4
   }
+
   resource_group_name = "rg-linux-devops-agents"
   location            = "westeurope"
   azure_devops_org_name = var.azure_devops_org_name
@@ -38,18 +50,6 @@ module "aci-devops-agent" {
   azure_devops_personal_access_token = var.azure_devops_personal_access_token
 }
 ```
-
-You can check the [main README](../../README.md#build-the-docker-images) to understand how to build your own Docker images.
-
-##### How to use it
-
-Before running this sample, you need to [create an agent pool in your Azure DevOps organization](https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/pools-queues?view=azure-devops&tabs=yaml%2Cbrowser#creating-agent-pools) and a [personal access token](https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/v2-linux?view=azure-devops#permissions) that it authorized to manage this agent pool.
-
-This configuration has 3 variables:
-
-- `azure_devops_org_name`: the name of your Azure DevOps organization (if you are connecting to `https://dev.azure.com/helloworld`, then `helloworld` is your organization name)
-- `azure_devops_pool_name`: the name of the agent pool that you have created
-- `azure_devops_personal_access_token`: the personal access token that you have generated
 
 Then, you can just Terraform it:
 
@@ -73,9 +73,9 @@ terraform destroy \
     -var azure_devops_personal_access_token="pat_token"
 ```
 
-#### Azure DevOps Agents ACI Terraform module - Deploy Linux agents in an existing virtual network
+#### Terraform ACI DevOps Agents - Deploy Linux agents in an existing virtual network
 
-The configuration below can be used to deploy Azure DevOps agents in Linux containers on ACI, in an existing virtual network.
+The configuration below can be used to deploy Azure DevOps agents in Linux containers, in an existing virtual network.
 
 ```hcl
 resource "azurerm_resource_group" "vnet-rg" {
@@ -107,12 +107,13 @@ resource "azurerm_subnet" "aci-subnet" {
 }
 
 module "aci-devops-agent" {
-  source                   = "../../"
-  enable_vnet_integration  = true
-  create_resource_group    = true
-  vnet_resource_group_name = azurerm_resource_group.vnet-rg.name
-  vnet_name                = azurerm_virtual_network.vnet.name
-  subnet_name              = azurerm_subnet.aci-subnet.name
+  source                     = "Azure/aci-devops-agent/azurerm"
+  enable_vnet_integration    = true
+  create_resource_group      = true
+  vnet_resource_group_name   = azurerm_resource_group.vnet-rg.name
+  vnet_name                  = azurerm_virtual_network.vnet.name
+  subnet_name                = azurerm_subnet.aci-subnet.name
+  
   linux_agents_configuration = {
     agent_name_prefix = "linux-agent"
     count             = 2,
@@ -122,24 +123,13 @@ module "aci-devops-agent" {
     cpu               = 1
     memory            = 4
   }
+  
   resource_group_name                = "rg-linux-devops-agents"
   location                           = "westeurope"
   azure_devops_org_name              = var.azure_devops_org_name
   azure_devops_personal_access_token = var.azure_devops_personal_access_token
 }
 ```
-
-You can check the [main README](../../README.md#build-the-docker-images) to understand how to build your own Docker images.
-
-##### How to use it
-
-Before running this sample, you need to [create an agent pool in your Azure DevOps organization](https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/pools-queues?view=azure-devops&tabs=yaml%2Cbrowser#creating-agent-pools) and a [personal access token](https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/v2-linux?view=azure-devops#permissions) that it authorized to manage this agent pool.
-
-This configuration has 3 variables:
-
-- `azure_devops_org_name`: the name of your Azure DevOps organization (if you are connecting to `https://dev.azure.com/helloworld`, then helloworld is your organization name)
-- `azure_devops_pool_name`: the name of the agent pool that you have created
-- `azure_devops_personal_access_token`: the personal access token that you have generated
 
 Then, you can just Terraform it:
 
@@ -163,15 +153,16 @@ terraform destroy \
     -var azure_devops_personal_access_token="pat_token"
 ```
 
-#### Azure DevOps Agents ACI Terraform module - Deploy both Linux and Windows agents
+#### Terraform ACI DevOps Agents - Deploy both Linux and Windows agents
 
 The configuration below can be used to deploy Azure DevOps Linux and Windows agents in containers on ACI.
 
 ```hcl
 module "aci-devops-agent" {
-  source                  = "../../"
-  enable_vnet_integration = false
-  create_resource_group   = true
+  source                     = "Azure/aci-devops-agent/azurerm"
+  enable_vnet_integration    = false
+  create_resource_group      = true
+  
   linux_agents_configuration = {
     agent_name_prefix = "linux-agent"
     count             = 2,
@@ -181,6 +172,7 @@ module "aci-devops-agent" {
     cpu               = 1
     memory            = 4
   }
+
   windows_agents_configuration = {
     agent_name_prefix = "windows-agent"
     count             = 2,
@@ -196,19 +188,6 @@ module "aci-devops-agent" {
   azure_devops_personal_access_token = var.azure_devops_personal_access_token
 }
 ```
-
-You can check the [main README](../../README.md#build-the-docker-images) to understand how to build your own Docker images.
-
-##### How to use it
-
-Before running this sample, you need to [create one or two agent pools in your Azure DevOps organization (one for Linux agents, and one for Windows agents)](https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/pools-queues?view=azure-devops&tabs=yaml%2Cbrowser#creating-agent-pools) and a [personal access token](https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/v2-linux?view=azure-devops#permissions) that it authorized to manage this agent pool.
-
-This configuration has 3 variables:
-
-- `azure_devops_org_name`: the name of your Azure DevOps organization (if you are connecting to `https://dev.azure.com/helloworld`, then helloworld is your organization name)
-- `linux_azure_devops_pool_name`: the name of the agent pool that you have created for the Linux agents
-- `windows_azure_devops_pool_name`: the name of the agent pool that you have created for the Windows agents
-- `azure_devops_personal_access_token`: the personal access token that you have generated
 
 Then, you can just Terraform it:
 

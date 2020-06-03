@@ -14,30 +14,30 @@ variable azure_devops_personal_access_token {
 }
 
 variable location {
-  type = string
+  type        = string
   description = "The Azure location to use"
-  default = "westus"
+  default     = "westus"
 }
 
 variable agent_docker_image {
-  type = string
+  type        = string
   description = "The Docker image to use for the Linux agent"
-  default = "jcorioland/aci-devops-agent"
+  default     = "jcorioland/aci-devops-agent"
 }
 
 variable agent_docker_tag {
-  type = string
+  type        = string
   description = "The Docker tag to use for the Linux agent"
-  default = "0.2-linux"
+  default     = "0.2-linux"
 }
 
 variable agents_count {
-  type = number
+  type        = number
   description = "The number of agents to create"
-  default = 2
+  default     = 2
 }
 
 variable random_suffix {
-  type = number
+  type        = number
   description = "A random suffix for resources generated during the test"
 }

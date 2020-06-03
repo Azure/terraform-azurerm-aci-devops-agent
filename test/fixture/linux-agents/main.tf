@@ -1,6 +1,7 @@
 module "aci-devops-agent" {
-  source                  = "../../../"
-  enable_vnet_integration = false
+  source                    = "../../../"
+  enable_vnet_integration   = false
+  create_new_resource_group = true
   linux_agents_configuration = {
     agent_name_prefix = "linuxagent-${var.random_suffix}"
     count             = var.agents_count

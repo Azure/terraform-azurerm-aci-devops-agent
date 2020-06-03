@@ -27,11 +27,12 @@ resource "azurerm_subnet" "aci-subnet" {
 }
 
 module "aci-devops-agent" {
-  source                   = "../../../"
-  enable_vnet_integration  = true
-  vnet_resource_group_name = azurerm_resource_group.vnet-rg.name
-  vnet_name                = azurerm_virtual_network.vnet.name
-  subnet_name              = azurerm_subnet.aci-subnet.name
+  source                    = "../../../"
+  enable_vnet_integration   = true
+  create_new_resource_group = true
+  vnet_resource_group_name  = azurerm_resource_group.vnet-rg.name
+  vnet_name                 = azurerm_virtual_network.vnet.name
+  subnet_name               = azurerm_subnet.aci-subnet.name
   linux_agents_configuration = {
     agent_name_prefix = "linuxagent-${var.random_suffix}"
     count             = var.agents_count

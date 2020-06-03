@@ -11,16 +11,6 @@ data "azurerm_subnet" "subnet" {
   resource_group_name  = var.vnet_resource_group_name
 }
 
-/*
-The container group configuration has to be different depending on the fact that vnet integraton is enabled or disabled.
-We can use a "dynamic" block to emit one case or the other. Because dynamic works with a for_each iteration, the idea is to create an array for each case that will have 1 or 0 entry, to emit or not the block
-For more about dynamic block, see: https://www.terraform.io/docs/configuration/expressions.html#dynamic-blocks
-*/
-locals {
-  enable_vnet_integration_array  = var.enable_vnet_integration ? [""] : []
-  disable_vnet_integration_array = var.enable_vnet_integration ? [] : [""]
-}
-
 # Linux Agents - deployed only if variable linux_agents_configuration.count > 0
 
 resource "azurerm_network_profile" "linux_network_profile" {

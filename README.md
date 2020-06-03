@@ -22,11 +22,14 @@ The configuration below can be used to deploy Linux DevOps agents using Azure Co
 module "aci-devops-agent" {
   source                  = "../../"
   enable_vnet_integration = false
+  create_resource_group   = true
   linux_agents_configuration = {
     agent_name_prefix = "linux-agent"
     count             = 2,
     docker_image      = "jcorioland/aci-devops-agent"
     docker_tag        = "0.2-linux"
+    cpu               = 1
+    memory            = 4
   }
   resource_group_name = "rg-linux-devops-agents"
   location            = "westeurope"
@@ -106,6 +109,7 @@ resource "azurerm_subnet" "aci-subnet" {
 module "aci-devops-agent" {
   source                   = "../../"
   enable_vnet_integration  = true
+  create_resource_group    = true
   vnet_resource_group_name = azurerm_resource_group.vnet-rg.name
   vnet_name                = azurerm_virtual_network.vnet.name
   subnet_name              = azurerm_subnet.aci-subnet.name
@@ -115,6 +119,8 @@ module "aci-devops-agent" {
     docker_image      = "jcorioland/aci-devops-agent"
     docker_tag        = "0.2-linux"
     agent_pool_name   = var.azure_devops_pool_name
+    cpu               = 1
+    memory            = 4
   }
   resource_group_name                = "rg-linux-devops-agents"
   location                           = "westeurope"
@@ -165,12 +171,15 @@ The configuration below can be used to deploy Azure DevOps Linux and Windows age
 module "aci-devops-agent" {
   source                  = "../../"
   enable_vnet_integration = false
+  create_resource_group   = true
   linux_agents_configuration = {
     agent_name_prefix = "linux-agent"
     count             = 2,
     docker_image      = "jcorioland/aci-devops-agent"
     docker_tag        = "0.2-linux"
     agent_pool_name   = var.linux_azure_devops_pool_name
+    cpu               = 1
+    memory            = 4
   }
   windows_agents_configuration = {
     agent_name_prefix = "windows-agent"
@@ -178,6 +187,8 @@ module "aci-devops-agent" {
     docker_image      = "jcorioland/aci-devops-agent"
     docker_tag        = "0.2-win"
     agent_pool_name   = var.windows_azure_devops_pool_name
+    cpu               = 1
+    memory            = 4
   }
   resource_group_name                = "rg-aci-devops-agents-we"
   location                           = "westeurope"

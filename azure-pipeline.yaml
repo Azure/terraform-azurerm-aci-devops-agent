@@ -60,3 +60,4 @@ stages:
             -e TF_VAR_azure_devops_pool_name=$(AZDO_POOL_NAME) \
             $(dockerImage):$(Build.BuildId) /bin/bash -c "bundle install && rake full"
         displayName: Run full end to end tests
+        condition: and(succeeded(),eq(variables['build.sourceBranch'], 'refs/heads/master'))

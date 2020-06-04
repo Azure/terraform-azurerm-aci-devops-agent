@@ -4,8 +4,6 @@ This repository contains a Terraform module that helps you to deploy [Azure DevO
 
 You can choose to deploy Linux or Windows agents, provide custom Docker images for the agents to include the tools you really need. It also give you the option to deploy the agents into a private virtual network, if the agents needs to access internal resources.
 
-[![Build Status](https://dev.azure.com/jcorioland-msft/terraform-azurerm-aci-devops-agents/_apis/build/status/Azure.terraform-azurerm-aci-devops-agent?branchName=master)](https://dev.azure.com/jcorioland-msft/terraform-azurerm-aci-devops-agents/_build/latest?definitionId=38&branchName=master)
-
 ## How-to use this module to deploy Azure DevOps agents
 
 ### Build the Docker images

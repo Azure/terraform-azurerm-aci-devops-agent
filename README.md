@@ -19,8 +19,8 @@ Before running this module, you need to [create an agent pool in your Azure DevO
 This module has 3 variables related to Azure DevOps:
 
 - `azure_devops_org_name`: the name of your Azure DevOps organization (if you are connecting to `https://dev.azure.com/helloworld`, then `helloworld` is your organization name)
-- `azure_devops_pool_name`: the name of the agent pool that you have created
 - `azure_devops_personal_access_token`: the personal access token that you have generated
+- `agent_pool_name`: both in the `linux_agents_configuration` and `windows_agents_configuration`, it is the name of the agent pool that you have created in which the Linux or Windows agents must be deployed
 
 ### Terraform ACI DevOps Agents usage
 
@@ -30,24 +30,23 @@ The configuration below can be used to deploy Linux DevOps agents using Azure Co
 
 ```hcl
 module "aci-devops-agent" {
-  source                     = "Azure/aci-devops-agent/azurerm"
-  enable_vnet_integration    = false
-  create_resource_group      = true
+  source                  = "Azure/aci-devops-agent/azurerm"
+  resource_group_name     = "rg-linux-devops-agents"
+  location                = "westeurope"
+  enable_vnet_integration = false
+  create_resource_group   = true
 
   linux_agents_configuration = {
     agent_name_prefix = "linux-agent"
+    agent_pool_name   = "DEVOPS_POOL_NAME"
     count             = 2,
     docker_image      = "jcorioland/aci-devops-agent"
     docker_tag        = "0.2-linux"
     cpu               = 1
     memory            = 4
   }
-
-  resource_group_name = "rg-linux-devops-agents"
-  location            = "westeurope"
-  azure_devops_org_name = var.azure_devops_org_name
-  azure_devops_pool_name = var.azure_devops_pool_name
-  azure_devops_personal_access_token = var.azure_devops_personal_access_token
+  azure_devops_org_name              = "DEVOPS_ORG_NAME"
+  azure_devops_personal_access_token = "DEVOPS_PERSONAL_ACCESS_TOKEN"
 }
 ```
 
@@ -55,22 +54,14 @@ Then, you can just Terraform it:
 
 ```bash
 terraform init
-terraform plan \
-    -var azure_devops_org_name="your_org_name" \
-    -var azure_devops_pool_name="your_pool_name" \
-    -var azure_devops_personal_access_token="pat_token" \
-    -out aci-linux-devops-agents.plan
-
+terraform plan -out aci-linux-devops-agents.plan
 terraform apply "aci-linux-devops-agents.plan"
 ```
 
 You can destroy everything using `terraform destroy`:
 
 ```bash
-terraform destroy \
-    -var azure_devops_org_name="your_org_name" \
-    -var azure_devops_pool_name="your_pool_name" \
-    -var azure_devops_personal_access_token="pat_token"
+terraform destroy
 ```
 
 #### Terraform ACI DevOps Agents - Deploy Linux agents in an existing virtual network
@@ -107,27 +98,27 @@ resource "azurerm_subnet" "aci-subnet" {
 }
 
 module "aci-devops-agent" {
-  source                     = "Azure/aci-devops-agent/azurerm"
-  enable_vnet_integration    = true
-  create_resource_group      = true
-  vnet_resource_group_name   = azurerm_resource_group.vnet-rg.name
-  vnet_name                  = azurerm_virtual_network.vnet.name
-  subnet_name                = azurerm_subnet.aci-subnet.name
-  
+  source                   = "Azure/aci-devops-agent/azurerm"
+  resource_group_name      = "rg-linux-devops-agents"
+  location                 = "westeurope"
+  enable_vnet_integration  = true
+  create_resource_group    = true
+  vnet_resource_group_name = azurerm_resource_group.vnet-rg.name
+  vnet_name                = azurerm_virtual_network.vnet.name
+  subnet_name              = azurerm_subnet.aci-subnet.name
+
   linux_agents_configuration = {
     agent_name_prefix = "linux-agent"
+    agent_pool_name   = "DEVOPS_POOL_NAME"
     count             = 2,
     docker_image      = "jcorioland/aci-devops-agent"
     docker_tag        = "0.2-linux"
-    agent_pool_name   = var.azure_devops_pool_name
     cpu               = 1
     memory            = 4
   }
-  
-  resource_group_name                = "rg-linux-devops-agents"
-  location                           = "westeurope"
-  azure_devops_org_name              = var.azure_devops_org_name
-  azure_devops_personal_access_token = var.azure_devops_personal_access_token
+
+  azure_devops_org_name              = "DEVOPS_ORG_NAME"
+  azure_devops_personal_access_token = "DEVOPS_PERSONAL_ACCESS_TOKEN"
 }
 ```
 
@@ -135,22 +126,14 @@ Then, you can just Terraform it:
 
 ```bash
 terraform init
-terraform plan \
-    -var azure_devops_org_name="your_org_name" \
-    -var azure_devops_pool_name="your_pool_name" \
-    -var azure_devops_personal_access_token="pat_token" \
-    -out aci-linux-devops-agents.plan
-
+terraform plan -out aci-linux-devops-agents.plan
 terraform apply "aci-linux-devops-agents.plan"
 ```
 
 You can destroy everything using `terraform destroy`:
 
 ```bash
-terraform destroy \
-    -var azure_devops_org_name="your_org_name" \
-    -var azure_devops_pool_name="your_pool_name" \
-    -var azure_devops_personal_access_token="pat_token"
+terraform destroy
 ```
 
 #### Terraform ACI DevOps Agents - Deploy both Linux and Windows agents
@@ -159,33 +142,34 @@ The configuration below can be used to deploy Azure DevOps Linux and Windows age
 
 ```hcl
 module "aci-devops-agent" {
-  source                     = "Azure/aci-devops-agent/azurerm"
-  enable_vnet_integration    = false
-  create_resource_group      = true
-  
+  source                  = "Azure/aci-devops-agent/azurerm"
+  resource_group_name     = "rg-aci-devops-agents-we"
+  location                = "westeurope"
+  enable_vnet_integration = false
+  create_resource_group   = true
+
   linux_agents_configuration = {
     agent_name_prefix = "linux-agent"
+    agent_pool_name   = "DEVOPS_POOL_NAME"
     count             = 2,
     docker_image      = "jcorioland/aci-devops-agent"
     docker_tag        = "0.2-linux"
-    agent_pool_name   = var.linux_azure_devops_pool_name
     cpu               = 1
     memory            = 4
   }
 
   windows_agents_configuration = {
     agent_name_prefix = "windows-agent"
+    agent_pool_name   = "DEVOPS_POOL_NAME"
     count             = 2,
     docker_image      = "jcorioland/aci-devops-agent"
     docker_tag        = "0.2-win"
-    agent_pool_name   = var.windows_azure_devops_pool_name
     cpu               = 1
     memory            = 4
   }
-  resource_group_name                = "rg-aci-devops-agents-we"
-  location                           = "westeurope"
-  azure_devops_org_name              = var.azure_devops_org_name
-  azure_devops_personal_access_token = var.azure_devops_personal_access_token
+
+  azure_devops_org_name              = "DEVOPS_ORG_NAME"
+  azure_devops_personal_access_token = "DEVOPS_PERSONAL_ACCESS_TOKEN"
 }
 ```
 
@@ -193,24 +177,14 @@ Then, you can just Terraform it:
 
 ```bash
 terraform init
-terraform plan \
-    -var azure_devops_org_name="your_org_name" \
-    -var azure_devops_personal_access_token="pat_token" \
-    -var linux_azure_devops_pool_name="your_pool_name" \
-    -var windows_azure_devops_pool_name="your_pool_name" \
-    -out aci-devops-agents.plan
-
+terraform plan -out aci-devops-agents.plan
 terraform apply "aci-devops-agents.plan"
 ```
 
 You can destroy everything using `terraform destroy`:
 
 ```bash
-terraform destroy \
-    -var azure_devops_org_name="your_org_name" \
-    -var azure_devops_personal_access_token="pat_token" \
-    -var linux_azure_devops_pool_name="your_pool_name" \
-    -var windows_azure_devops_pool_name="your_pool_name" \
+terraform destroy
 ```
 
 ## Test

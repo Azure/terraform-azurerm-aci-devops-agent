@@ -50,13 +50,13 @@ variable azure_devops_personal_access_token {
 
 variable linux_agents_configuration {
   type = object({
-    count             = any,
-    docker_image      = any,
-    docker_tag        = any,
-    agent_name_prefix = any,
-    agent_pool_name   = any,
-    cpu               = any,
-    memory            = any
+    count             = string,
+    docker_image      = string,
+    docker_tag        = string,
+    agent_name_prefix = string,
+    agent_pool_name   = string,
+    cpu               = string,
+    memory            = string
   })
   description = "(Optional) The configuration of the Linux agents to deploy"
   default = {
@@ -72,13 +72,13 @@ variable linux_agents_configuration {
 
 variable windows_agents_configuration {
   type = object({
-    count             = any,
-    docker_image      = any,
-    docker_tag        = any,
-    agent_name_prefix = any,
-    agent_pool_name   = any,
-    cpu               = any,
-    memory            = any
+    count             = string,
+    docker_image      = string,
+    docker_tag        = string,
+    agent_name_prefix = string,
+    agent_pool_name   = string,
+    cpu               = string,
+    memory            = string
   })
   description = "(Optional) The configuration of the Windows agents to deploy"
   default = {

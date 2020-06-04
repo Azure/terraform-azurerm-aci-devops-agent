@@ -24,6 +24,13 @@ This module has 3 variables related to Azure DevOps:
 
 ### Terraform ACI DevOps Agents usage
 
+#### Create or use an existing a resource group
+
+This module offers to create a new resource group to deploy the Azure Container instances into it, or import an existing one. This behavior is controlled using the `create_resource_group` flag:
+
+- if `create_resource_group` is set to true, the module will create a resource group named `resource_group_name` in the `location` region
+- if `create_resource_group` is set to false, the module will import a resource group data source with the name `resource_group_name`
+
 #### Terraform ACI DevOps Agents - Deploy Linux Agents
 
 The configuration below can be used to deploy Linux DevOps agents using Azure Container Instances.

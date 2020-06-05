@@ -6,7 +6,7 @@ resource "azurerm_resource_group" "rg" {
 module "aci-devops-agent" {
   source                    = "../../../"
   enable_vnet_integration   = false
-  create_new_resource_group = false
+  create_resource_group = false
   linux_agents_configuration = {
     agent_name_prefix = "linuxagent-${var.random_suffix}"
     count             = var.agents_count

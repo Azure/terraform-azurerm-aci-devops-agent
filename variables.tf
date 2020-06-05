@@ -8,7 +8,7 @@ variable location {
   description = "The Azure location to use for deployment"
 }
 
-variable create_new_resource_group {
+variable create_resource_group {
   type        = bool
   default     = true
   description = "(Optional) A flag that indicates if the resource group in which the agents will be deployed must be created (true) or imported (false)."

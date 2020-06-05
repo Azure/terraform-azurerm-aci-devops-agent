@@ -1,13 +1,13 @@
 resource "azurerm_resource_group" "rg" {
-  # the resource group is created only if the flag create_new_resource_group is set to true
-  count    = var.create_new_resource_group ? 1 : 0
+  # the resource group is created only if the flag create_resource_group is set to true
+  count    = var.create_resource_group ? 1 : 0
   name     = var.resource_group_name
   location = var.location
 }
 
 data "azurerm_resource_group" "rg" {
-  # the resource group is imported only if the flag create_new_resource_group is set to false
-  count = var.create_new_resource_group ? 0 : 1
+  # the resource group is imported only if the flag create_resource_group is set to false
+  count = var.create_resource_group ? 0 : 1
   name  = var.resource_group_name
 }
 
@@ -25,7 +25,7 @@ resource "azurerm_network_profile" "linux_network_profile" {
   count               = var.enable_vnet_integration ? var.linux_agents_configuration.count : 0
   name                = "linuxnetprofile${count.index}"
   location            = var.location
-  resource_group_name = var.create_new_resource_group ? azurerm_resource_group.rg[0].name : data.azurerm_resource_group.rg[0].name
+  resource_group_name = var.create_resource_group ? azurerm_resource_group.rg[0].name : data.azurerm_resource_group.rg[0].name
 
   container_network_interface {
     name = "linuxnic${count.index}"
@@ -41,7 +41,7 @@ resource "azurerm_container_group" "linux-container-group" {
   count               = var.linux_agents_configuration.count
   name                = "${var.linux_agents_configuration.agent_name_prefix}-${count.index}"
   location            = var.location
-  resource_group_name = var.create_new_resource_group ? azurerm_resource_group.rg[0].name : data.azurerm_resource_group.rg[0].name
+  resource_group_name = var.create_resource_group ? azurerm_resource_group.rg[0].name : data.azurerm_resource_group.rg[0].name
   ip_address_type     = var.enable_vnet_integration ? "private" : "public"
   os_type             = "linux"
   network_profile_id  = var.enable_vnet_integration ? azurerm_network_profile.linux_network_profile[count.index].id : null
@@ -73,7 +73,7 @@ resource "azurerm_network_profile" "windows_network_profile" {
   count               = var.enable_vnet_integration ? var.windows_agents_configuration.count : 0
   name                = "windowsnetprofile${count.index}"
   location            = var.location
-  resource_group_name = var.create_new_resource_group ? azurerm_resource_group.rg[0].name : data.azurerm_resource_group.rg[0].name
+  resource_group_name = var.create_resource_group ? azurerm_resource_group.rg[0].name : data.azurerm_resource_group.rg[0].name
 
   container_network_interface {
     name = "windowsnic${count.index}"
@@ -89,7 +89,7 @@ resource "azurerm_container_group" "windows-container-group" {
   count               = var.windows_agents_configuration.count
   name                = "${var.windows_agents_configuration.agent_name_prefix}-${count.index}"
   location            = var.location
-  resource_group_name = var.create_new_resource_group ? azurerm_resource_group.rg[0].name : data.azurerm_resource_group.rg[0].name
+  resource_group_name = var.create_resource_group ? azurerm_resource_group.rg[0].name : data.azurerm_resource_group.rg[0].name
   ip_address_type     = var.enable_vnet_integration ? "private" : "public"
   os_type             = "windows"
   network_profile_id  = var.enable_vnet_integration ? azurerm_network_profile.windows_network_profile[count.index].id : null

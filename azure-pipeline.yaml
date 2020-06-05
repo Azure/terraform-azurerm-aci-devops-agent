@@ -1,0 +1,63 @@
+# Azure Pipeline that runs module integration tests
+
+trigger: none
+
+variables:
+- group: AzureDevOpsACI.Secrets
+- name: dockerImage
+  value: 'terraform-azure-devops-aci'
+- name: terraformVersion
+  value: 0.12.25
+- name: vmImage
+  value: ubuntu-latest
+- name: serviceConnection
+  value: "terraform-azure-devops-aci"
+
+stages:
+  - stage: AzureDevOpsACITerraformModule
+    displayName: AZure DevOps ACI Agents Terraform Module - CI
+    jobs:
+    - job: AzureDevOpsACITerraformModuleJob
+      displayName: AZure DevOps ACI Agents Terraform Module - CI Job
+      pool:
+        vmImage: $(vmImage)
+      cancelTimeoutInMinutes: 30
+      steps:
+      - task: AzureCLI@1
+        displayName: Get Azure Credentials for Terraform
+        inputs:
+          azureSubscription: $(serviceConnection)
+          scriptLocation: inlineScript
+          inlineScript: |
+            set -eu
+            subscriptionId=$(az account show --query id -o tsv)
+            echo "##vso[task.setvariable variable=ARM_CLIENT_ID;issecret=true]$servicePrincipalId"
+            echo "##vso[task.setvariable variable=ARM_CLIENT_SECRET;issecret=true]$servicePrincipalKey"
+            echo "##vso[task.setvariable variable=ARM_SUBSCRIPTION_ID;issecret=true]$subscriptionId"
+            echo "##vso[task.setvariable variable=ARM_TENANT_ID;issecret=true]$tenantId"
+          addSpnToEnvironment: true
+      - task: Docker@2
+        displayName: Build Terratest Docker Image
+        inputs:
+          command: build
+          repository: $(dockerImage)
+          dockerfile: '$(System.DefaultWorkingDirectory)/Dockerfile'
+          buildContext: $(System.DefaultWorkingDirectory)
+          arguments: --build-arg BUILD_ARM_SUBSCRIPTION_ID=$(ARM_SUBSCRIPTION_ID) --build-arg BUILD_ARM_CLIENT_ID=$(ARM_CLIENT_ID) --build-arg BUILD_ARM_CLIENT_SECRET=$(ARM_CLIENT_SECRET) --build-arg BUILD_ARM_TENANT_ID=$(ARM_TENANT_ID)
+          tags: |
+            $(Build.BuildId)
+      - script: |
+          docker run --rm \
+            -e TF_VAR_azure_devops_org_name=$(AZDO_ORG_NAME) \
+            -e TF_VAR_azure_devops_personal_access_token=$(AZDO_PAT) \
+            -e TF_VAR_azure_devops_pool_name=$(AZDO_POOL_NAME) \
+            $(dockerImage):$(Build.BuildId) /bin/bash -c "bundle install && rake build"
+        displayName: Run validation tests
+      - script: |
+          docker run --rm \
+            -e TF_VAR_azure_devops_org_name=$(AZDO_ORG_NAME) \
+            -e TF_VAR_azure_devops_personal_access_token=$(AZDO_PAT) \
+            -e TF_VAR_azure_devops_pool_name=$(AZDO_POOL_NAME) \
+            $(dockerImage):$(Build.BuildId) /bin/bash -c "bundle install && rake full"
+        displayName: Run full end to end tests
+        condition: succeeded()  

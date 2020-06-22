@@ -65,6 +65,16 @@ resource "azurerm_container_group" "linux-container-group" {
       AZP_AGENT_NAME = "${var.linux_agents_configuration.agent_name_prefix}-${count.index}"
     }
   }
+
+  # if an image registry server has been specified, then generate the image_registry_credential block.
+  dynamic "image_registry_credential" {
+    for_each = var.image_registry_credential.server == "" ? [] : [1]
+    content {
+      username = var.image_registry_credential.username
+      password = var.image_registry_credential.password
+      server   = var.image_registry_credential.server
+    }
+  }
 }
 
 # Windows Agents - deployed only if variable windows_agents_configuration.count > 0
@@ -111,6 +121,16 @@ resource "azurerm_container_group" "windows-container-group" {
       AZP_POOL       = var.windows_agents_configuration.agent_pool_name
       AZP_TOKEN      = var.azure_devops_personal_access_token
       AZP_AGENT_NAME = "${var.windows_agents_configuration.agent_name_prefix}-${count.index}"
+    }
+  }
+
+  # if an image registry server has been specified, then generate the image_registry_credential block.
+  dynamic "image_registry_credential" {
+    for_each = var.image_registry_credential.server == "" ? [] : [1]
+    content {
+      username = var.image_registry_credential.username
+      password = var.image_registry_credential.password
+      server   = var.image_registry_credential.server
     }
   }
 }

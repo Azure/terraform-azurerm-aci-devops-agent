@@ -5,6 +5,7 @@ logs/
 
 # Variable files
 terraform.tfvars
+local.tfvars
 
 # .tfstate files
 *.tfstate

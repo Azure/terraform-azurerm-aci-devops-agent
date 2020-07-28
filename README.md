@@ -192,6 +192,52 @@ You can destroy everything using `terraform destroy`:
 terraform destroy
 ```
 
+#### Terraform ACI DevOps Agents - Use a private Docker image registry
+
+This module allows to download the Docker images to use for the agents from a private Docker images registry, like Azure Container Registry. It can be done like below:
+
+```hcl
+module "aci-devops-agent" {
+  source                  = "Azure/aci-devops-agent/azurerm"
+  resource_group_name     = "rg-linux-devops-agents"
+  location                = "westeurope"
+  enable_vnet_integration = false
+  create_resource_group   = true
+
+  linux_agents_configuration = {
+    agent_name_prefix = "linux-agent"
+    agent_pool_name   = "DEVOPS_POOL_NAME"
+    count             = 2,
+    docker_image      = "jcorioland.azurecr.io/azure-devops/aci-devops-agent"
+    docker_tag        = "0.2-linux"
+    cpu               = 1
+    memory            = 4
+  }
+  azure_devops_org_name              = "DEVOPS_ORG_NAME"
+  azure_devops_personal_access_token = "DEVOPS_PERSONAL_ACCESS_TOKEN"
+
+  image_registry_credential = {
+    username = "DOCKER_PRIVATE_REGISTRY_USERNAME"
+    password = "DOCKER_PRIVATE_REGISTRY_PASSWORD"
+    server   = "jcorioland.azurecr.io"
+  }
+}
+```
+
+Then, you can just Terraform it:
+
+```bash
+terraform init
+terraform plan -out aci-linux-devops-agents.plan
+terraform apply "aci-linux-devops-agents.plan"
+```
+
+You can destroy everything using `terraform destroy`:
+
+```bash
+terraform destroy
+```
+
 ## Test
 
 ### Configurations

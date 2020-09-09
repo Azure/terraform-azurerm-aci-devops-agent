@@ -49,6 +49,7 @@ module "aci-devops-agent" {
     docker_tag        = "0.2-linux"
     cpu               = 1
     memory            = 4
+    container_port    = 80
   }
   azure_devops_org_name              = "DEVOPS_ORG_NAME"
   azure_devops_personal_access_token = "DEVOPS_PERSONAL_ACCESS_TOKEN"
@@ -120,6 +121,7 @@ module "aci-devops-agent" {
     docker_tag        = "0.2-linux"
     cpu               = 1
     memory            = 4
+    container_port    = 80
   }
 
   azure_devops_org_name              = "DEVOPS_ORG_NAME"
@@ -161,6 +163,7 @@ module "aci-devops-agent" {
     docker_tag        = "0.2-linux"
     cpu               = 1
     memory            = 4
+    container_port    = 80
   }
 
   windows_agents_configuration = {
@@ -171,6 +174,7 @@ module "aci-devops-agent" {
     docker_tag        = "0.2-win"
     cpu               = 1
     memory            = 4
+    container_port    = 80
   }
 
   azure_devops_org_name              = "DEVOPS_ORG_NAME"
@@ -212,6 +216,7 @@ module "aci-devops-agent" {
     docker_tag        = "0.2-linux"
     cpu               = 1
     memory            = 4
+    container_port    = 80
   }
   azure_devops_org_name              = "DEVOPS_ORG_NAME"
   azure_devops_personal_access_token = "DEVOPS_PERSONAL_ACCESS_TOKEN"

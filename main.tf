@@ -54,7 +54,7 @@ resource "azurerm_container_group" "linux-container-group" {
 
     # this field seems to be mandatory (error happens if not there). See https://github.com/terraform-providers/terraform-provider-azurerm/issues/1697#issuecomment-608669422
     ports {
-      port     = 80
+      port     = var.linux_agents_configuration.container_port
       protocol = "TCP"
     }
 
@@ -112,7 +112,7 @@ resource "azurerm_container_group" "windows-container-group" {
 
     # this field seems to be mandatory (error happens if not there). See https://github.com/terraform-providers/terraform-provider-azurerm/issues/1697#issuecomment-608669422
     ports {
-      port     = 80
+      port     = var.windows_agents_configuration.container_port
       protocol = "TCP"
     }
 

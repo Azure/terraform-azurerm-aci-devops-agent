@@ -61,8 +61,11 @@ resource "azurerm_container_group" "linux-container-group" {
     environment_variables = {
       AZP_URL        = "https://dev.azure.com/${var.azure_devops_org_name}"
       AZP_POOL       = var.linux_agents_configuration.agent_pool_name
-      AZP_TOKEN      = var.azure_devops_personal_access_token
       AZP_AGENT_NAME = "${var.linux_agents_configuration.agent_name_prefix}-${count.index}"
+    }
+
+    secure_environment_variables = {
+      AZP_TOKEN = var.azure_devops_personal_access_token
     }
   }
 
@@ -119,8 +122,10 @@ resource "azurerm_container_group" "windows-container-group" {
     environment_variables = {
       AZP_URL        = "https://dev.azure.com/${var.azure_devops_org_name}"
       AZP_POOL       = var.windows_agents_configuration.agent_pool_name
-      AZP_TOKEN      = var.azure_devops_personal_access_token
       AZP_AGENT_NAME = "${var.windows_agents_configuration.agent_name_prefix}-${count.index}"
+    }
+    secure_environment_variables = {
+      AZP_TOKEN = var.azure_devops_personal_access_token
     }
   }
 

@@ -73,9 +73,6 @@ curl -LsS $AZP_AGENTPACKAGE_URL | tar -xz & wait $!
 
 source ./env.sh
 
-trap 'cleanup; exit 130' INT
-trap 'cleanup; exit 143' TERM
-
 print_header "3. Configuring Azure Pipelines agent..."
 
 ./config.sh --unattended \
@@ -88,11 +85,11 @@ print_header "3. Configuring Azure Pipelines agent..."
   --replace \
   --acceptTeeEula & wait $!
 
-# remove the administrative token before accepting work
-rm $AZP_TOKEN_FILE
-
 print_header "4. Running Azure Pipelines agent..."
 
-# `exec` the node runtime so it's aware of TERM and INT signals
-# AgentService.js understands how to handle agent self-update and restart
-exec ./externals/node/bin/node ./bin/AgentService.js interactive
+trap 'cleanup; exit 130' INT
+trap 'cleanup; exit 143' TERM
+
+# To be aware of TERM and INT signals call run.sh
+# Running it with the --once flag at the end will shut down the agent after the build is executed
+./run.sh & wait $!

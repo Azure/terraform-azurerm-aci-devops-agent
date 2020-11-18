@@ -54,9 +54,6 @@ if (-not (Test-Path Env:AZP_URL)) {
       --work "$(if (Test-Path Env:AZP_WORK) { ${Env:AZP_WORK} } else { '_work' })" `
       --replace
   
-    # remove the administrative token before accepting work
-    Remove-Item $Env:AZP_TOKEN_FILE
-  
     Write-Host "4. Running Azure Pipelines agent..." -ForegroundColor Cyan
   
     .\run.cmd

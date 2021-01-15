@@ -1,6 +1,9 @@
 # Azure Pipeline that runs module integration tests
 
-trigger: none
+trigger:
+- master
+pr:
+- master
 
 variables:
 - group: AzureDevOpsACI.Secrets

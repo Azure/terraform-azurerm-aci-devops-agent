@@ -1,15 +1,18 @@
 # Azure Pipeline that runs module integration tests
 
-trigger: none
+trigger:
+- master
+pr:
+- master
 
 variables:
 - group: AzureDevOpsACI.Secrets
 - name: dockerImage
   value: 'terraform-azure-devops-aci'
 - name: terraformVersion
-  value: 0.12.25
+  value: 0.14.4
 - name: vmImage
-  value: ubuntu-latest
+  value: ubuntu-18.04
 - name: serviceConnection
   value: "terraform-azure-devops-aci"
 
@@ -43,7 +46,7 @@ stages:
           repository: $(dockerImage)
           dockerfile: '$(System.DefaultWorkingDirectory)/Dockerfile'
           buildContext: $(System.DefaultWorkingDirectory)
-          arguments: --build-arg BUILD_ARM_SUBSCRIPTION_ID=$(ARM_SUBSCRIPTION_ID) --build-arg BUILD_ARM_CLIENT_ID=$(ARM_CLIENT_ID) --build-arg BUILD_ARM_CLIENT_SECRET=$(ARM_CLIENT_SECRET) --build-arg BUILD_ARM_TENANT_ID=$(ARM_TENANT_ID)
+          arguments: --build-arg BUILD_ARM_SUBSCRIPTION_ID=$(ARM_SUBSCRIPTION_ID) --build-arg BUILD_ARM_CLIENT_ID=$(ARM_CLIENT_ID) --build-arg BUILD_ARM_CLIENT_SECRET=$(ARM_CLIENT_SECRET) --build-arg BUILD_ARM_TENANT_ID=$(ARM_TENANT_ID) --build-arg BUILD_TERRAFORM_VERSION=$(terraformVersion)
           tags: |
             $(Build.BuildId)
       - script: |

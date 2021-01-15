@@ -94,6 +94,8 @@ func TestDeployAzureDevOpsLinuxAgentsInVirtualNetwork(t *testing.T) {
 	devopsPoolName := os.Getenv("TF_VAR_azure_devops_pool_name")
 	testPoolName := fmt.Sprintf("%s-%s", devopsPoolName, randomSuffix)
 	os.Setenv("TF_VAR_azure_devops_pool_name", testPoolName)
+	// reset env var after test
+	defer os.Setenv("TF_VAR_azure_devops_pool_name", devopsPoolName)
 
 	devopsOrganizationName := os.Getenv("TF_VAR_azure_devops_org_name")
 	devopsPersonalAccessToken := os.Getenv("TF_VAR_azure_devops_personal_access_token")

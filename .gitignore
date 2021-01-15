@@ -2,6 +2,7 @@
 **/.terraform/*
 terraform.tfstate.d/
 logs/ 
+.terraform.lock.hcl
 
 # Variable files
 terraform.tfvars

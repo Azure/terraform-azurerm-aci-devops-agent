@@ -21,10 +21,7 @@ ENV ARM_TEST_LOCATION=${BUILD_ARM_TEST_LOCATION}
 ENV ARM_TEST_LOCATION_ALT=${BUILD_ARM_TEST_LOCATION_ALT}
 
 # Set work directory.
-RUN mkdir /go
-RUN mkdir /go/bin
-RUN mkdir /go/src
-RUN mkdir /go/src/${MODULE_NAME}
+RUN mkdir -p /go/src/${MODULE_NAME}
 COPY . /go/src/${MODULE_NAME}
 WORKDIR /go/src/${MODULE_NAME}
 

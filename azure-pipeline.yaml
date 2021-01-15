@@ -12,7 +12,7 @@ variables:
 - name: terraformVersion
   value: 0.14.4
 - name: vmImage
-  value: ubuntu-latest
+  value: ubuntu-18.04
 - name: serviceConnection
   value: "terraform-azure-devops-aci"
 

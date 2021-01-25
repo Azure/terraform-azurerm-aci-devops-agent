@@ -107,6 +107,12 @@ func TestDeployAzureDevOpsLinuxAgentsInVirtualNetwork(t *testing.T) {
 		t.Fatalf("Cannot create Azure DevOps agent pool for the test: %v", err)
 	}
 
+	// At the end of the test, clean up any resources that were created
+	defer test_structure.RunTestStage(t, "teardown", func() {
+		terraformOptions := test_structure.LoadTerraformOptions(t, fixtureFolder)
+		terraform.Destroy(t, terraformOptions)
+	})
+
 	// Deploy the example
 	test_structure.RunTestStage(t, "setup", func() {
 		terraformOptions := configureTerraformOptions(t, fixtureFolder)
@@ -134,12 +140,6 @@ func TestDeployAzureDevOpsLinuxAgentsInVirtualNetwork(t *testing.T) {
 		if expectedAgentsCount != actualAgentsCount {
 			t.Fatalf("Test failed. Expected number of agents is %d. Actual number of agents is %d", expectedAgentsCount, actualAgentsCount)
 		}
-	})
-
-	// At the end of the test, clean up any resources that were created
-	test_structure.RunTestStage(t, "teardown", func() {
-		terraformOptions := test_structure.LoadTerraformOptions(t, fixtureFolder)
-		terraform.Destroy(t, terraformOptions)
 	})
 }
 
@@ -181,6 +181,12 @@ func TestDeployAzureDevOpsLinuxAndWindowsAgents(t *testing.T) {
 		t.Fatalf("Cannot create Azure DevOps Linux agent pool for the test: %v", err)
 	}
 
+		// At the end of the test, clean up any resources that were created
+	defer test_structure.RunTestStage(t, "teardown", func() {
+		terraformOptions := test_structure.LoadTerraformOptions(t, fixtureFolder)
+		terraform.Destroy(t, terraformOptions)
+	})
+
 	// Deploy the example
 	test_structure.RunTestStage(t, "setup", func() {
 		terraformOptions := configureTerraformOptions(t, fixtureFolder)
@@ -221,12 +227,6 @@ func TestDeployAzureDevOpsLinuxAndWindowsAgents(t *testing.T) {
 			t.Fatalf("Test failed. Expected number of Windows agents is %d. Actual number of Windows agents is %d", expectedWindowsAgentsCount, actualWindowsAgentsCount)
 		}
 	})
-
-	// At the end of the test, clean up any resources that were created
-	test_structure.RunTestStage(t, "teardown", func() {
-		terraformOptions := test_structure.LoadTerraformOptions(t, fixtureFolder)
-		terraform.Destroy(t, terraformOptions)
-	})
 }
 
 // This function tests the deployment of Azure DevOps Linux agents into an existing resource group
@@ -256,6 +256,13 @@ func TestDeployAzureDevOpsLinuxAgentsIntoExistingRresourceGroup(t *testing.T) {
 		t.Fatalf("Cannot create Azure DevOps agent pool for the test: %v", err)
 	}
 
+
+	// At the end of the test, clean up any resources that were created
+	defer test_structure.RunTestStage(t, "teardown", func() {
+		terraformOptions := test_structure.LoadTerraformOptions(t, fixtureFolder)
+		terraform.Destroy(t, terraformOptions)
+	})
+
 	// Deploy the example
 	test_structure.RunTestStage(t, "setup", func() {
 		terraformOptions := configureTerraformOptions(t, fixtureFolder)
@@ -284,11 +291,89 @@ func TestDeployAzureDevOpsLinuxAgentsIntoExistingRresourceGroup(t *testing.T) {
 			t.Fatalf("Test failed. Expected number of agents is %d. Actual number of agents is %d", expectedAgentsCount, actualAgentsCount)
 		}
 	})
+}
+
+// This function tests the deployment of Azure DevOps Linux and Windows agents
+func TestAgentCleanUp(t *testing.T) {
+	t.Parallel()
+
+	fixtureFolder := "./fixture/agent-pool-cleanup"
+
+	// generate a random suffix for the test
+	rand.Seed(time.Now().UnixNano())
+	randomInt := rand.Intn(9999)
+	randomSuffix := strconv.Itoa(randomInt)
+
+
+	// create random agent pool name
+	testPoolName := fmt.Sprintf("e2e-agents-%s", randomSuffix)
+	os.Setenv("TF_VAR_linux_azure_devops_pool_name", testPoolName)
+	os.Setenv("TF_VAR_windows_azure_devops_pool_name", testPoolName)
+
+	devopsOrganizationName := os.Getenv("TF_VAR_azure_devops_org_name")
+	devopsPersonalAccessToken := os.Getenv("TF_VAR_azure_devops_personal_access_token")
+	devopsOrganizationURL := fmt.Sprintf("https://dev.azure.com/%s", devopsOrganizationName)
+
+	// create the Linux agents pool
+	defer deleteAzureDevOpsAgentTestPool(testPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
+	err := createAzureDevOpsAgentTestPool(testPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
+	if err != nil {
+		t.Fatalf("Cannot create Azure DevOps Linux agent pool for the test: %v", err)
+	}
+
 
 	// At the end of the test, clean up any resources that were created
-	test_structure.RunTestStage(t, "teardown", func() {
+	defer test_structure.RunTestStage(t, "teardown", func() {
 		terraformOptions := test_structure.LoadTerraformOptions(t, fixtureFolder)
 		terraform.Destroy(t, terraformOptions)
+	})
+
+	// Deploy the example
+	test_structure.RunTestStage(t, "setup", func() {
+		terraformOptions := configureTerraformOptions(t, fixtureFolder)
+
+		// Save the options so later test stages can use them
+		test_structure.SaveTerraformOptions(t, fixtureFolder, terraformOptions)
+
+		// This will init and apply the resources and fail the test if there are any errors
+		terraform.InitAndApply(t, terraformOptions)
+	})
+
+	// Check whether the length of output meets the requirement
+	test_structure.RunTestStage(t, "validate", func() {
+		// add wait time for ACI to get connectivity
+		time.Sleep(45 * time.Second)
+
+		// ensure deployment was successful for agents
+		expectedAgentsCount := 2
+		actualAgentsCount, err := getAgentsCount(testPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
+
+		if err != nil {
+			t.Fatalf("Cannot retrieve the number of agents that were deployed: %v", err)
+		}
+
+		if expectedAgentsCount != actualAgentsCount {
+			t.Fatalf("Test failed. Expected number of agents is %d. Actual number of agents is %d", expectedAgentsCount, actualAgentsCount)
+		}
+
+		// Update agent count
+		terraformOptions := test_structure.LoadTerraformOptions(t, fixtureFolder)
+		terraformOptions.Vars["agents_count"] = "1"
+		terraform.Apply(t, terraformOptions)
+		// add wait time for ACI to update
+		time.Sleep(45 * time.Second)
+
+		expectedAgentsCount = 1
+		actualAgentsCount, err = getAgentsCount(testPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
+
+		if err != nil {
+			t.Fatalf("Cannot retrieve the number of agents that were deployed: %v", err)
+		}
+
+		if expectedAgentsCount != actualAgentsCount {
+			t.Fatalf("Test failed. Expected number of agents is %d. Actual number of agents is %d", expectedAgentsCount, actualAgentsCount)
+		}
+
 	})
 }
 

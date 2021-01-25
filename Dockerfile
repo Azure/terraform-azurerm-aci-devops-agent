@@ -20,14 +20,15 @@ ENV ARM_TENANT_ID=${BUILD_ARM_TENANT_ID}
 ENV ARM_TEST_LOCATION=${BUILD_ARM_TEST_LOCATION}
 ENV ARM_TEST_LOCATION_ALT=${BUILD_ARM_TEST_LOCATION_ALT}
 
-# Set work directory.
-RUN mkdir -p /go/src/${MODULE_NAME}
-COPY . /go/src/${MODULE_NAME}
-WORKDIR /go/src/${MODULE_NAME}
-
 # Install dep.
 ENV GOPATH /go
 ENV PATH /usr/local/go/bin:$GOPATH/bin:$PATH
 RUN /bin/bash -c "curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh"
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
+# Set work directory.
+RUN mkdir -p /go/src/${MODULE_NAME}
+WORKDIR /go/src/${MODULE_NAME}
+COPY . /go/src/${MODULE_NAME}
 
 RUN ["bundle", "install", "--gemfile", "./Gemfile"]

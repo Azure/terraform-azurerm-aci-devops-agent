@@ -293,7 +293,7 @@ func TestDeployAzureDevOpsLinuxAgentsIntoExistingRresourceGroup(t *testing.T) {
 	})
 }
 
-// This function tests the deployment of Azure DevOps Linux and Windows agents
+// This function tests the deployment of Azure DevOps Linux
 func TestAgentCleanUp(t *testing.T) {
 	t.Parallel()
 

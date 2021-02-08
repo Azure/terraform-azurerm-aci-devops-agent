@@ -71,7 +71,7 @@ terraform destroy
 
 #### Terraform ACI DevOps Agents - Deploy Linux agents in an existing virtual network
 
-The configuration below can be used to deploy Azure DevOps agents in Linux containers, in an existing virtual network.
+The configuration below can be used to deploy Azure DevOps agents in Linux containers, in an existing virtual network. Windows containers are not yet supported in a container group deployed to a Virtual Network.
 
 ```hcl
 resource "azurerm_resource_group" "vnet-rg" {

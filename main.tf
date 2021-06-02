@@ -19,6 +19,15 @@ data "azurerm_subnet" "subnet" {
   resource_group_name  = var.vnet_resource_group_name
 }
 
+locals {
+  # umi == user managed identity, smi == system managed identity
+	use_umi = "var.linux_agents_configuration.user_assigned_identity_ids.count > 0"
+  use_smi = "var.linux_agents_configuration.use_system_assigned_identity"
+	identity_block_smi         = "locals.use_smi && !locals.use_umi ? [1] : []"
+	identity_block_umi         = "locals.use_umi && !locals.use_smi ? [1] : []"
+	identity_block_umi_and_smi = "locals.use_umi && locals.use_smi ?  [1] : []"
+}
+
 # Linux Agents - deployed only if variable linux_agents_configuration.count > 0
 
 resource "azurerm_network_profile" "linux_network_profile" {
@@ -76,6 +85,28 @@ resource "azurerm_container_group" "linux-container-group" {
       username = var.image_registry_credential.username
       password = var.image_registry_credential.password
       server   = var.image_registry_credential.server
+    }
+  }
+
+  # identity block
+  dynamic "identity" {
+    for_each = local.identity_block_smi
+    content {
+      type = SystemAssigned
+    }
+  }
+  dynamic "identity" {
+    for_each = local.identity_block_umi
+    content {
+      type = UserAssigned
+      identity_ids = var.linux_agents_configuration.user_assigned_identity_ids
+    }
+  }
+  dynamic "identity" {
+    for_each = local.identity_block_umi_and_smi
+    content {
+      type = SystemAssigned, UserAssigned
+      identity_ids = var.linux_agents_configuration.user_assigned_identity_ids
     }
   }
 }

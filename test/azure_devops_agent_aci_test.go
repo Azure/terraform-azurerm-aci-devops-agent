@@ -428,7 +428,7 @@ func getAgentIdentitiesCount(resourceGroupName string, containerGroupName string
 
 	authorizer, err := auth.NewAuthorizerFromEnvironment()
 	if err != nil {
-		return nil, nil, err
+		return -1, -1, err
 	}
 
 	containerGroupsClient := containerinstance.NewContainerGroupsClient(azSubscriptionId)
@@ -436,14 +436,12 @@ func getAgentIdentitiesCount(resourceGroupName string, containerGroupName string
 	containerGroup, err := containerGroupsClient.Get(ctx, resourceGroupName, containerGroupName)
 
 	if containerGroup.Identity != nil {
-		if containerGroup.Identity.Type != nil {
-			if strings.Contains(containerGroup.Identity.Type, "SystemAssigned") {
-				systemAssignedIdentitiesCount := 1
-			}
+		if strings.Contains(fmt.Sprintf("%s", containerGroup.Identity.Type), "SystemAssigned") {
+			systemAssignedIdentitiesCount = 1
+		}
 
-			if containerGroup.Identity.UserAssignedIdentities != nil {
-				userAssignedIdentitiesCount := len(containerGroup.Identity.UserAssignedIdentities)
-			}
+		if containerGroup.Identity.UserAssignedIdentities != nil {
+			userAssignedIdentitiesCount = len(containerGroup.Identity.UserAssignedIdentities)
 		}
 	}
 

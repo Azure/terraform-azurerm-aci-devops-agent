@@ -70,6 +70,7 @@ terraform destroy
 ```
 
 #### Terraform ACI DevOps Agents - Deploy Linux agents in an existing virtual network
+
 *Note: Virtual Network integration is only supported for Linux Containers in ACI. This part [does not apply to Windows Containers](https://docs.microsoft.com/en-us/azure/container-instances/container-instances-virtual-network-concepts#other-limitations).*
 The configuration below can be used to deploy Azure DevOps agents in Linux containers, in an existing virtual network.
 
@@ -240,7 +241,9 @@ terraform destroy
 
 #### Terraform ACI DevOps Agents - Assign identities
 
-This module allows to download the Docker images to use for the agents from a private Docker images registry, like Azure Container Registry. It can be done like below:
+This module allows to assign both system and user assigned managed identities to the containers:
+
+NB: managed identities for container groups have limitations. See <https://docs.microsoft.com/en-us/azure/container-instances/container-instances-virtual-network-concepts#other-limitations> and <https://docs.microsoft.com/en-us/azure/container-instances/container-instances-managed-identity#limitations>.
 
 ```hcl
 resource "azurerm_user_assigned_identity" "example1" {

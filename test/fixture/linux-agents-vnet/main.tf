@@ -41,6 +41,8 @@ module "aci-devops-agent" {
     agent_pool_name   = var.azure_devops_pool_name
     cpu               = 1
     memory            = 4
+    user_assigned_identity_ids   = []
+    use_system_assigned_identity = false
   }
   resource_group_name                = "rg-terraform-azure-devops-agents-e2e-tests-${var.random_suffix}"
   location                           = var.location

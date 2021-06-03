@@ -57,7 +57,7 @@ variable "linux_agents_configuration" {
     agent_pool_name              = string,
     cpu                          = string,
     memory                       = string,
-    user_assigned_identity_ids   = list,
+    user_assigned_identity_ids   = list(string),
     use_system_assigned_identity = bool
   })
   description = "(Optional) The configuration of the Linux agents to deploy"

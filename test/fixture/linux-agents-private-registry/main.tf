@@ -10,6 +10,8 @@ module "aci-devops-agent" {
     agent_pool_name   = var.azure_devops_pool_name
     cpu               = 1
     memory            = 4
+    user_assigned_identity_ids   = []
+    use_system_assigned_identity = false
   }
   image_registry_credential = {
     username = var.docker_registry_username

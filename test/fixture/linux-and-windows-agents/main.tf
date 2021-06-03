@@ -3,13 +3,15 @@ module "aci-devops-agent" {
   enable_vnet_integration = false
   create_resource_group   = true
   linux_agents_configuration = {
-    agent_name_prefix = "linux-agent-${var.random_suffix}"
-    count             = 2,
-    docker_image      = var.linux_agent_docker_image
-    docker_tag        = var.linux_agent_docker_tag
-    agent_pool_name   = var.linux_azure_devops_pool_name
-    cpu               = 1
-    memory            = 4
+    agent_name_prefix            = "linux-agent-${var.random_suffix}"
+    count                        = 2,
+    docker_image                 = var.linux_agent_docker_image
+    docker_tag                   = var.linux_agent_docker_tag
+    agent_pool_name              = var.linux_azure_devops_pool_name
+    cpu                          = 1
+    memory                       = 4
+    user_assigned_identity_ids   = []
+    use_system_assigned_identity = false
   }
   windows_agents_configuration = {
     agent_name_prefix = "windows-agent-${var.random_suffix}"

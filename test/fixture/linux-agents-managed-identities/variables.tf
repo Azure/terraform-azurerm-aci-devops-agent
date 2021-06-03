@@ -41,18 +41,3 @@ variable "random_suffix" {
   type        = number
   description = "A random suffix for resources generated during the test"
 }
-
-variable "docker_registry_url" {
-  type        = string
-  description = "The server URL of the Docker private registry"
-}
-
-variable "docker_registry_username" {
-  type        = string
-  description = "The username of the Docker private registry"
-}
-
-variable "docker_registry_password" {
-  type        = string
-  description = "The password of the Docker private registry"
-}

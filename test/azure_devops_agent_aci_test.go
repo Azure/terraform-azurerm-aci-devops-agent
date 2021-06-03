@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -13,6 +14,8 @@ import (
 	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
 	"github.com/microsoft/azure-devops-go-api/azuredevops"
 	"github.com/microsoft/azure-devops-go-api/azuredevops/taskagent"
+	"github.com/Azure/azure-sdk-for-go/services/containerinstance/mgmt/2020-11-01/containerinstance"
+	"github.com/Azure/go-autorest/autorest/azure/auth"
 )
 
 // This function tests the deployment of Azure DevOps Linux agents
@@ -135,16 +138,25 @@ func TestDeployAzureDevOpsLinuxAgentsWithManagedIdentities(t *testing.T) {
 		}
 
 		// ensure managed identities were assigned: 1 system identity, 2 user assigned identities
-		expectedAgentIdentitiesCount := 3
+		expectedAgentSystemIdentitiesCount := 1
+		expectedAgentUserAssignedIdentitiesCount := 2
 
-		actualAgentIdentitiesCount, err := getAgentIdentitiesCount(testPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
+		terraformOptions := test_structure.LoadTerraformOptions(t, fixtureFolder)
+		resourceGroupName := terraform.Output(t, terraformOptions, "resource_group_name")
+		linuxContainerGroupName := terraform.Output(t, terraformOptions, "linux_container_group_name")
+
+		systemIdentitiesCount, userAssignedIdentitiesCount, err := getAgentIdentitiesCount(resourceGroupName, linuxContainerGroupName)
 
 		if err != nil {
-			t.Fatalf("Cannot retrieve the number of agents that were deployed: %v", err)
+			t.Fatalf("Cannot retrieve the identities for agents that were deployed: %v", err)
 		}
 
-		if expectedAgentIdentitiesCount != actualAgentIdentitiesCount {
-			t.Fatalf("Test failed. Expected number of agent identities is %d. Actual number of agent identities is %d", expectedAgentIdentitiesCount, actualAgentIdentitiesCount)
+		if expectedAgentSystemIdentitiesCount != systemIdentitiesCount {
+			t.Fatalf("Test failed. Expected number of agent system identities is %d. Actual number of agent system identities is %d", expectedAgentSystemIdentitiesCount, systemIdentitiesCount)
+		}
+
+		if expectedAgentUserAssignedIdentitiesCount != userAssignedIdentitiesCount {
+			t.Fatalf("Test failed. Expected number of agent user assigned identities is %d. Actual number of agent user assigned identities is %d", expectedAgentUserAssignedIdentitiesCount, userAssignedIdentitiesCount)
 		}
 	})
 
@@ -407,13 +419,35 @@ func getAgentsCount(devopsPoolName string, devopsOrganizationURL string, devopsP
 	return len(*agents), nil
 }
 
-func getAgentIdentitiesCount(devopsPoolName string, devopsOrganizationURL string, devopsPersonalAccessToken string) (int, error) {
+func getAgentIdentitiesCount(resourceGroupName string, containerGroupName string) (int, int, error) {
+	systemAssignedIdentitiesCount := 0
+	userAssignedIdentitiesCount := 0
+
+	azSubscriptionId := os.Getenv("AZAURE_SUBSCRIPTION_ID")
 	ctx := context.Background()
 
-	// TODO implement
-	return 3, nil
+	authorizer, err := auth.NewAuthorizerFromEnvironment()
+	if err != nil {
+		return nil, nil, err
+	}
 
-	//return len(*agents), nil
+	containerGroupsClient := containerinstance.NewContainerGroupsClient(azSubscriptionId)
+	containerGroupsClient.Authorizer = authorizer
+	containerGroup, err := containerGroupsClient.Get(ctx, resourceGroupName, containerGroupName)
+
+	if containerGroup.Identity != nil {
+		if containerGroup.Identity.Type != nil {
+			if strings.Contains(containerGroup.Identity.Type, "SystemAssigned") {
+				systemAssignedIdentitiesCount := 1
+			}
+
+			if containerGroup.Identity.UserAssignedIdentities != nil {
+				userAssignedIdentitiesCount := len(containerGroup.Identity.UserAssignedIdentities)
+			}
+		}
+	}
+
+	return systemAssignedIdentitiesCount, userAssignedIdentitiesCount, nil
 }
 
 func createAzureDevOpsAgentTestPool(devopsPoolName string, devopsOrganizationURL string, devopsPersonalAccessToken string) error {

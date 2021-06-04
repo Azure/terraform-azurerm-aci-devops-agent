@@ -21,11 +21,11 @@ data "azurerm_subnet" "subnet" {
 
 locals {
   # umi == user managed identity, smi == system managed identity
-	use_umi = length(var.linux_agents_configuration.user_assigned_identity_ids) > 0
-  use_smi = var.linux_agents_configuration.use_system_assigned_identity
-	identity_block_smi         = local.use_smi && !local.use_umi ? [1] : []
-	identity_block_umi         = local.use_umi && !local.use_smi ? [1] : []
-	identity_block_umi_and_smi = local.use_umi && local.use_smi ?  [1] : []
+  use_umi                    = length(var.linux_agents_configuration.user_assigned_identity_ids) > 0
+  use_smi                    = var.linux_agents_configuration.use_system_assigned_identity
+  identity_block_smi         = local.use_smi && !local.use_umi ? [1] : []
+  identity_block_umi         = local.use_umi && !local.use_smi ? [1] : []
+  identity_block_umi_and_smi = local.use_umi && local.use_smi ? [1] : []
 }
 
 # Linux Agents - deployed only if variable linux_agents_configuration.count > 0
@@ -98,14 +98,14 @@ resource "azurerm_container_group" "linux-container-group" {
   dynamic "identity" {
     for_each = local.identity_block_umi
     content {
-      type = "UserAssigned"
+      type         = "UserAssigned"
       identity_ids = var.linux_agents_configuration.user_assigned_identity_ids
     }
   }
   dynamic "identity" {
     for_each = local.identity_block_umi_and_smi
     content {
-      type = "SystemAssigned, UserAssigned"
+      type         = "SystemAssigned, UserAssigned"
       identity_ids = var.linux_agents_configuration.user_assigned_identity_ids
     }
   }

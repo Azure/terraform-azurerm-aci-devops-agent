@@ -1,8 +1,8 @@
 # Pull the base image with given version.
 ARG BUILD_TERRAFORM_VERSION="0.14.4"
-FROM jcorioland/terraform-test:${BUILD_TERRAFORM_VERSION}
+FROM mcr.microsoft.com/terraform-test:${BUILD_TERRAFORM_VERSION}
 
-ARG MODULE_NAME="terraform-azure-devops-eagent-aci"
+ARG MODULE_NAME="terraform-azure-devops-agent-aci"
 
 # Declare default build configurations for terraform.
 ARG BUILD_ARM_SUBSCRIPTION_ID=""

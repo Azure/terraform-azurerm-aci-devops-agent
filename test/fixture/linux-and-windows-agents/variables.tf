@@ -23,7 +23,7 @@ variable "windows_azure_devops_pool_name" {
 variable "location" {
   type        = string
   description = "The Azure location to use"
-  default     = "westeurope"
+  default     = "northeurope"
 }
 
 variable "linux_agent_docker_image" {

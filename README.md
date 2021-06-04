@@ -255,7 +255,7 @@ terraform destroy
 
 This module allows to assign both system and user assigned managed identities to the containers:
 
-NB: managed identities for container groups have limitations. See <https://docs.microsoft.com/en-us/azure/container-instances/container-instances-virtual-network-concepts#other-limitations> and <https://docs.microsoft.com/en-us/azure/container-instances/container-instances-managed-identity#limitations>.
+NB: managed identities for container groups have limitations. Only Linux container groups that are not deployed to a virtual network can be assigned managed identities. See <https://docs.microsoft.com/en-us/azure/container-instances/container-instances-virtual-network-concepts#other-limitations> and <https://docs.microsoft.com/en-us/azure/container-instances/container-instances-managed-identity> for more details.
 
 ```hcl
 resource "azurerm_user_assigned_identity" "example1" {

@@ -88,13 +88,15 @@ resource "azurerm_container_group" "linux-container-group" {
     }
   }
 
-  # identity block
+  # identity block generated depending on cases
+  # if a system assigned managed identity only is requested
   dynamic "identity" {
     for_each = local.identity_block_smi
     content {
       type = "SystemAssigned"
     }
   }
+  # if user assigned managed identities only are requested
   dynamic "identity" {
     for_each = local.identity_block_umi
     content {
@@ -102,6 +104,7 @@ resource "azurerm_container_group" "linux-container-group" {
       identity_ids = var.linux_agents_configuration.user_assigned_identity_ids
     }
   }
+  # if both system and user assigned managed identities are requested
   dynamic "identity" {
     for_each = local.identity_block_umi_and_smi
     content {

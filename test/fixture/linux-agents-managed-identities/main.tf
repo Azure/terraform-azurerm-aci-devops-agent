@@ -1,7 +1,6 @@
 locals {
   resource_group_name = "rg-terraform-azure-devops-agents-e2e-tests-${var.random_suffix}"
 }
-
 resource "azurerm_resource_group" "rg" {
   name     = local.resource_group_name
   location = var.location
@@ -9,13 +8,11 @@ resource "azurerm_resource_group" "rg" {
 resource "azurerm_user_assigned_identity" "example1" {
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-
   name = "identity1"
 }
 resource "azurerm_user_assigned_identity" "example2" {
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-
   name = "identity2"
 }
 module "aci-devops-agent" {
@@ -33,8 +30,9 @@ module "aci-devops-agent" {
     user_assigned_identity_ids = [azurerm_user_assigned_identity.example1.id, azurerm_user_assigned_identity.example2.id]
     use_system_assigned_identity = true
   }
-  resource_group_name                = azurerm_resource_group.name
+  resource_group_name                = azurerm_resource_group.rg.name
   location                           = var.location
   azure_devops_org_name              = var.azure_devops_org_name
   azure_devops_personal_access_token = var.azure_devops_personal_access_token
+  depends_on                         = [azurerm_resource_group.rg]
 }

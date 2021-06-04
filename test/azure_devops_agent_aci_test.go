@@ -126,7 +126,7 @@ func TestDeployAzureDevOpsLinuxAgentsWithManagedIdentities(t *testing.T) {
 
 		// ensure deployment was successful
 		expectedAgentsCount := 2
-		
+
 		actualAgentsCount, err := getAgentsCount(testPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
 
 		if err != nil {
@@ -142,8 +142,9 @@ func TestDeployAzureDevOpsLinuxAgentsWithManagedIdentities(t *testing.T) {
 		expectedAgentUserAssignedIdentitiesCount := 2
 
 		terraformOptions := test_structure.LoadTerraformOptions(t, fixtureFolder)
-		resourceGroupName := terraform.Output(t, terraformOptions, "resource_group_name")
-		linuxContainerGroupName := terraform.Output(t, terraformOptions, "linux_container_group_name")
+		// remove quotes because of https://github.com/hashicorp/terraform/issues/27100
+		resourceGroupName := removeQuotes(terraform.Output(t, terraformOptions, "resource_group_name"))
+		linuxContainerGroupName := removeQuotes(terraform.Output(t, terraformOptions, "linux_container_group_name"))
 
 		systemIdentitiesCount, userAssignedIdentitiesCount, err := getAgentIdentitiesCount(resourceGroupName, linuxContainerGroupName)
 
@@ -151,8 +152,9 @@ func TestDeployAzureDevOpsLinuxAgentsWithManagedIdentities(t *testing.T) {
 			t.Fatalf("Cannot retrieve the identities for agents that were deployed: %v", err)
 		}
 
-		if expectedAgentSystemIdentitiesCount != systemIdentitiesCount {
-			t.Fatalf("Test failed. Expected number of agent system identities is %d. Actual number of agent system identities is %d", expectedAgentSystemIdentitiesCount, systemIdentitiesCount)
+		if expectedAgentSystemIdentitiesCount != systemIdentitiesCount || expectedAgentUserAssignedIdentitiesCount != userAssignedIdentitiesCount {
+			t.Fatalf("Test failed. System identities: %d (actual) vs %d (expected), user assigned identities %d (actual) vs %d (expected)", 
+			systemIdentitiesCount, expectedAgentSystemIdentitiesCount, userAssignedIdentitiesCount, expectedAgentUserAssignedIdentitiesCount)
 		}
 
 		if expectedAgentUserAssignedIdentitiesCount != userAssignedIdentitiesCount {
@@ -423,7 +425,7 @@ func getAgentIdentitiesCount(resourceGroupName string, containerGroupName string
 	systemAssignedIdentitiesCount := 0
 	userAssignedIdentitiesCount := 0
 
-	azSubscriptionId := os.Getenv("AZAURE_SUBSCRIPTION_ID")
+	azSubscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
 	ctx := context.Background()
 
 	authorizer, err := auth.NewAuthorizerFromEnvironment()
@@ -434,6 +436,9 @@ func getAgentIdentitiesCount(resourceGroupName string, containerGroupName string
 	containerGroupsClient := containerinstance.NewContainerGroupsClient(azSubscriptionId)
 	containerGroupsClient.Authorizer = authorizer
 	containerGroup, err := containerGroupsClient.Get(ctx, resourceGroupName, containerGroupName)
+	if err != nil {
+		return -1, -1, err
+	}
 
 	if containerGroup.Identity != nil {
 		if strings.Contains(fmt.Sprintf("%s", containerGroup.Identity.Type), "SystemAssigned") {
@@ -506,4 +511,14 @@ func getAgentPool(ctx context.Context, devopsTaskAgentClient taskagent.Client, d
 	}
 
 	return &(*matchingAgentPools)[0], nil
+}
+
+func removeQuotes(s string) (string) {
+	if len(s) > 0 && s[0] == '"' {
+		s = s[1:]
+	}
+	if len(s) > 0 && s[len(s)-1] == '"' {
+		s = s[:len(s)-1]
+	}
+	return s
 }

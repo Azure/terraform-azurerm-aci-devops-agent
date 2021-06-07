@@ -10,12 +10,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Azure/azure-sdk-for-go/services/containerinstance/mgmt/2020-11-01/containerinstance"
+	"github.com/Azure/go-autorest/autorest/azure/auth"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
 	"github.com/microsoft/azure-devops-go-api/azuredevops"
 	"github.com/microsoft/azure-devops-go-api/azuredevops/taskagent"
-	"github.com/Azure/azure-sdk-for-go/services/containerinstance/mgmt/2020-11-01/containerinstance"
-	"github.com/Azure/go-autorest/autorest/azure/auth"
 )
 
 // This function tests the deployment of Azure DevOps Linux agents
@@ -153,8 +153,8 @@ func TestDeployAzureDevOpsLinuxAgentsWithManagedIdentities(t *testing.T) {
 		}
 
 		if expectedAgentSystemIdentitiesCount != systemIdentitiesCount || expectedAgentUserAssignedIdentitiesCount != userAssignedIdentitiesCount {
-			t.Fatalf("Test failed. System identities: %d (actual) vs %d (expected), user assigned identities %d (actual) vs %d (expected)", 
-			systemIdentitiesCount, expectedAgentSystemIdentitiesCount, userAssignedIdentitiesCount, expectedAgentUserAssignedIdentitiesCount)
+			t.Fatalf("Test failed. System identities: %d (actual) vs %d (expected), user assigned identities %d (actual) vs %d (expected)",
+				systemIdentitiesCount, expectedAgentSystemIdentitiesCount, userAssignedIdentitiesCount, expectedAgentUserAssignedIdentitiesCount)
 		}
 
 		if expectedAgentUserAssignedIdentitiesCount != userAssignedIdentitiesCount {
@@ -321,7 +321,7 @@ func TestDeployAzureDevOpsLinuxAndWindowsAgents(t *testing.T) {
 }
 
 // This function tests the deployment of Azure DevOps Linux agents into an existing resource group
-func TestDeployAzureDevOpsLinuxAgentsIntoExistingRresourceGroup(t *testing.T) {
+func TestDeployAzureDevOpsLinuxAgentsIntoExistingResourceGroup(t *testing.T) {
 	t.Parallel()
 
 	fixtureFolder := "./fixture/linux-agents-import-rg"
@@ -513,7 +513,7 @@ func getAgentPool(ctx context.Context, devopsTaskAgentClient taskagent.Client, d
 	return &(*matchingAgentPools)[0], nil
 }
 
-func removeQuotes(s string) (string) {
+func removeQuotes(s string) string {
 	if len(s) > 0 && s[0] == '"' {
 		s = s[1:]
 	}

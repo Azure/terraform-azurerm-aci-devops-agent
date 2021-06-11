@@ -373,7 +373,21 @@ func TestAgentCleanUp(t *testing.T) {
 		if expectedAgentsCount != actualAgentsCount {
 			t.Fatalf("Test failed. Expected number of agents is %d. Actual number of agents is %d", expectedAgentsCount, actualAgentsCount)
 		}
+// destroying infrastructure:
+terraformOptions := test_structure.LoadTerraformOptions(t, fixtureFolder)
+terraform.Destroy(t, terraformOptions)
 
+// after clean up, new expected count = 0
+expectedAgentsCount = 0
+actualAgentsCount, err = getAgentsCount(testPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
+
+if err != nil {
+	t.Fatalf("Cannot retrieve the number of agents that were deployed: %v", err)
+}
+
+if expectedAgentsCount != actualAgentsCount {
+	t.Fatalf("Test failed. Expected number of agents is %d. Actual number of agents is %d", expectedAgentsCount, actualAgentsCount)
+}
 	})
 }
 

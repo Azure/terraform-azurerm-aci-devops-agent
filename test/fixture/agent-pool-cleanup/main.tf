@@ -48,13 +48,15 @@ module "aci-devops-agent" {
   create_resource_group   = false
 
   linux_agents_configuration = {
-    agent_name_prefix = "linux-agent-${random_string.suffix.result}"
-    count             = var.agents_count,
-    docker_image      = "${azurerm_container_registry.acr.login_server}/${var.linux_agent_docker_image}"
-    docker_tag        = var.linux_agent_docker_tag
-    agent_pool_name   = var.linux_azure_devops_pool_name
-    cpu               = 1
-    memory            = 4
+    agent_name_prefix            = "linux-agent-${random_string.suffix.result}"
+    count                        = var.agents_count,
+    docker_image                 = "${azurerm_container_registry.acr.login_server}/${var.linux_agent_docker_image}"
+    docker_tag                   = var.linux_agent_docker_tag
+    agent_pool_name              = var.linux_azure_devops_pool_name
+    cpu                          = 1
+    memory                       = 4
+    user_assigned_identity_ids   = [azurerm_user_assigned_identity.example1.id, azurerm_user_assigned_identity.example2.id]
+    use_system_assigned_identity = true
   }
 
   image_registry_credential = {

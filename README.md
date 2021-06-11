@@ -36,6 +36,7 @@ The configuration below can be used to deploy Linux DevOps agents using Azure Co
 ```hcl
 module "aci-devops-agent" {
   source                  = "Azure/aci-devops-agent/azurerm"
+  version                 = "0.9.2"
   resource_group_name     = "rg-linux-devops-agents"
   location                = "westeurope"
   enable_vnet_integration = false
@@ -49,6 +50,8 @@ module "aci-devops-agent" {
     docker_tag        = "0.2-linux"
     cpu               = 1
     memory            = 4
+    user_assigned_identity_ids   = []
+    use_system_assigned_identity = false
   }
   azure_devops_org_name              = "DEVOPS_ORG_NAME"
   azure_devops_personal_access_token = "DEVOPS_PERSONAL_ACCESS_TOKEN"
@@ -71,6 +74,7 @@ terraform destroy
 
 #### Terraform ACI DevOps Agents - Deploy Linux agents in an existing virtual network
 
+*Note: Virtual Network integration is only supported for Linux Containers in ACI. This part [does not apply to Windows Containers](https://docs.microsoft.com/en-us/azure/container-instances/container-instances-virtual-network-concepts#other-limitations).*
 The configuration below can be used to deploy Azure DevOps agents in Linux containers, in an existing virtual network.
 
 ```hcl
@@ -104,6 +108,7 @@ resource "azurerm_subnet" "aci-subnet" {
 
 module "aci-devops-agent" {
   source                   = "Azure/aci-devops-agent/azurerm"
+  version                  = "0.9.2"
   resource_group_name      = "rg-linux-devops-agents"
   location                 = "westeurope"
   enable_vnet_integration  = true
@@ -120,6 +125,8 @@ module "aci-devops-agent" {
     docker_tag        = "0.2-linux"
     cpu               = 1
     memory            = 4
+    user_assigned_identity_ids   = []
+    use_system_assigned_identity = false
   }
 
   azure_devops_org_name              = "DEVOPS_ORG_NAME"
@@ -148,6 +155,7 @@ The configuration below can be used to deploy Azure DevOps Linux and Windows age
 ```hcl
 module "aci-devops-agent" {
   source                  = "Azure/aci-devops-agent/azurerm"
+  version                 = "0.9.2"
   resource_group_name     = "rg-aci-devops-agents-we"
   location                = "westeurope"
   enable_vnet_integration = false
@@ -161,6 +169,8 @@ module "aci-devops-agent" {
     docker_tag        = "0.2-linux"
     cpu               = 1
     memory            = 4
+    user_assigned_identity_ids   = []
+    use_system_assigned_identity = false
   }
 
   windows_agents_configuration = {
@@ -199,6 +209,7 @@ This module allows to download the Docker images to use for the agents from a pr
 ```hcl
 module "aci-devops-agent" {
   source                  = "Azure/aci-devops-agent/azurerm"
+  version                 = "0.9.2"
   resource_group_name     = "rg-linux-devops-agents"
   location                = "westeurope"
   enable_vnet_integration = false
@@ -212,6 +223,8 @@ module "aci-devops-agent" {
     docker_tag        = "0.2-linux"
     cpu               = 1
     memory            = 4
+    user_assigned_identity_ids   = []
+    use_system_assigned_identity = false
   }
   azure_devops_org_name              = "DEVOPS_ORG_NAME"
   azure_devops_personal_access_token = "DEVOPS_PERSONAL_ACCESS_TOKEN"
@@ -221,6 +234,63 @@ module "aci-devops-agent" {
     password = "DOCKER_PRIVATE_REGISTRY_PASSWORD"
     server   = "jcorioland.azurecr.io"
   }
+}
+```
+
+Then, you can just Terraform it:
+
+```bash
+terraform init
+terraform plan -out aci-linux-devops-agents.plan
+terraform apply "aci-linux-devops-agents.plan"
+```
+
+You can destroy everything using `terraform destroy`:
+
+```bash
+terraform destroy
+```
+
+#### Terraform ACI DevOps Agents - Assign identities
+
+This module allows to assign both system and user assigned managed identities to the containers:
+
+NB: managed identities for container groups have limitations. Only Linux container groups that are not deployed to a virtual network can be assigned managed identities. See <https://docs.microsoft.com/en-us/azure/container-instances/container-instances-virtual-network-concepts#other-limitations> and <https://docs.microsoft.com/en-us/azure/container-instances/container-instances-managed-identity> for more details.
+
+```hcl
+resource "azurerm_user_assigned_identity" "example1" {
+  resource_group_name = "rg-terraform-azure-devops-agents-e2e-tests-${var.random_suffix}"
+  location            = var.location
+
+  name = "identity1"
+}
+resource "azurerm_user_assigned_identity" "example2" {
+  resource_group_name = "rg-terraform-azure-devops-agents-e2e-tests-${var.random_suffix}"
+  location            = var.location
+
+  name = "identity2"
+}
+module "aci-devops-agent" {
+  source                  = "Azure/aci-devops-agent/azurerm"
+  version                 = "0.9.2"
+  resource_group_name     = "rg-linux-devops-agents"
+  location                = "westeurope"
+  enable_vnet_integration = false
+  create_resource_group   = true
+
+  linux_agents_configuration = {
+    agent_name_prefix = "linux-agent"
+    agent_pool_name   = "DEVOPS_POOL_NAME"
+    count             = 2,
+    docker_image      = "jcorioland.azurecr.io/azure-devops/aci-devops-agent"
+    docker_tag        = "0.2-linux"
+    cpu               = 1
+    memory            = 4
+    user_assigned_identity_ids = [azurerm_user_assigned_identity.example1.id, data.azurerm_identity.example2.id]
+    use_system_assigned_identity = true
+  }
+  azure_devops_org_name              = "DEVOPS_ORG_NAME"
+  azure_devops_personal_access_token = "DEVOPS_PERSONAL_ACCESS_TOKEN"
 }
 ```
 
@@ -260,7 +330,7 @@ We provide 2 ways to build, run, and test the module on a local development mach
 We provide simple script to quickly set up module development environment:
 
 ```sh
-$ curl -sSL https://raw.githubusercontent.com/Azure/terramodtest/master/tool/env_setup.sh | sudo bash
+curl -sSL https://raw.githubusercontent.com/Azure/terramodtest/master/tool/env_setup.sh | sudo bash
 ```
 
 #### Run test
@@ -268,9 +338,9 @@ $ curl -sSL https://raw.githubusercontent.com/Azure/terramodtest/master/tool/env
 Then simply run it in local shell:
 
 ```sh
-$ bundle install
-$ rake build
-$ rake full
+bundle install
+rake build
+rake full
 ```
 
 ### Docker
@@ -286,13 +356,20 @@ We provide a Dockerfile to build a new image based `FROM` the `microsoft/terrafo
 This builds the custom image:
 
 ```sh
-$ docker build --build-arg BUILD_ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID --build-arg BUILD_ARM_CLIENT_ID=$ARM_CLIENT_ID --build-arg BUILD_ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET --build-arg BUILD_ARM_TENANT_ID=$ARM_TENANT_ID -t azure-devops-agent-aci-test .
+docker build \
+    --build-arg BUILD_ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID \
+    --build-arg BUILD_ARM_CLIENT_ID=$ARM_CLIENT_ID \
+    --build-arg BUILD_ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET \
+    --build-arg BUILD_ARM_TENANT_ID=$ARM_TENANT_ID \
+    -t azure-devops-agent-aci-test .
 ```
+
+NB: cf `az ad sp create-for-rbac --help` to get build-arg values
 
 This runs the build and unit tests:
 
 ```sh
-$ docker run --rm \
+docker run --rm \
     -e TF_VAR_azure_devops_org_name=$AZDO_ORG_NAME \
     -e TF_VAR_azure_devops_personal_access_token=$AZDO_PAT \
     -e TF_VAR_azure_devops_pool_name=$AZDO_POOL_NAME \
@@ -302,7 +379,7 @@ $ docker run --rm \
 This runs the end to end tests:
 
 ```sh
-$ docker run --rm \
+docker run --rm \
     -e TF_VAR_azure_devops_org_name=$AZDO_ORG_NAME \
     -e TF_VAR_azure_devops_personal_access_token=$AZDO_PAT \
     -e TF_VAR_azure_devops_pool_name=$AZDO_POOL_NAME \
@@ -312,7 +389,7 @@ $ docker run --rm \
 This runs the full tests:
 
 ```sh
-$ docker run --rm \
+docker run --rm \
     -e TF_VAR_azure_devops_org_name=$AZDO_ORG_NAME \
     -e TF_VAR_azure_devops_personal_access_token=$AZDO_PAT \
     -e TF_VAR_azure_devops_pool_name=$AZDO_POOL_NAME \

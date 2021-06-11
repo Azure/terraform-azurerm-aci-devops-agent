@@ -47,3 +47,6 @@ Gemfile.lock
 
 # Mac folder attribute file
 .DS_Store
+
+# a developer can copy his/her own files in a me/ folder without having them in git
+**/me/

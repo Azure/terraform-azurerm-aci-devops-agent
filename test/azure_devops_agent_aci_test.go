@@ -272,7 +272,7 @@ func TestDeployAzureDevOpsLinuxAndWindowsAgents(t *testing.T) {
 		t.Fatalf("Cannot create Azure DevOps Linux agent pool for the test: %v", err)
 	}
 
-		// At the end of the test, clean up any resources that were created
+	// At the end of the test, clean up any resources that were created
 	defer test_structure.RunTestStage(t, "teardown", func() {
 		terraformOptions := test_structure.LoadTerraformOptions(t, fixtureFolder)
 		terraform.Destroy(t, terraformOptions)
@@ -347,7 +347,6 @@ func TestDeployAzureDevOpsLinuxAgentsIntoExistingResourceGroup(t *testing.T) {
 		t.Fatalf("Cannot create Azure DevOps agent pool for the test: %v", err)
 	}
 
-
 	// At the end of the test, clean up any resources that were created
 	defer test_structure.RunTestStage(t, "teardown", func() {
 		terraformOptions := test_structure.LoadTerraformOptions(t, fixtureFolder)
@@ -395,7 +394,6 @@ func TestAgentCleanUp(t *testing.T) {
 	randomInt := rand.Intn(9999)
 	randomSuffix := strconv.Itoa(randomInt)
 
-
 	// create random agent pool name
 	testPoolName := fmt.Sprintf("e2e-agents-%s", randomSuffix)
 	os.Setenv("TF_VAR_linux_azure_devops_pool_name", testPoolName)
@@ -411,7 +409,6 @@ func TestAgentCleanUp(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Cannot create Azure DevOps Linux agent pool for the test: %v", err)
 	}
-
 
 	// At the end of the test, clean up any resources that were created
 	defer test_structure.RunTestStage(t, "teardown", func() {
@@ -464,21 +461,22 @@ func TestAgentCleanUp(t *testing.T) {
 		if expectedAgentsCount != actualAgentsCount {
 			t.Fatalf("Test failed. Expected number of agents is %d. Actual number of agents is %d", expectedAgentsCount, actualAgentsCount)
 		}
-// destroying infrastructure:
-terraformOptions := test_structure.LoadTerraformOptions(t, fixtureFolder)
-terraform.Destroy(t, terraformOptions)
 
-// after clean up, new expected count = 0
-expectedAgentsCount = 0
-actualAgentsCount, err = getAgentsCount(testPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
+		// destroying infrastructure:
+		terraformOptions = test_structure.LoadTerraformOptions(t, fixtureFolder)
+		terraform.Destroy(t, terraformOptions)
 
-if err != nil {
-	t.Fatalf("Cannot retrieve the number of agents that were deployed: %v", err)
-}
+		// after clean up, new expected count = 0
+		expectedAgentsCount = 0
+		actualAgentsCount, err = getAgentsCount(testPoolName, devopsOrganizationURL, devopsPersonalAccessToken)
 
-if expectedAgentsCount != actualAgentsCount {
-	t.Fatalf("Test failed. Expected number of agents is %d. Actual number of agents is %d", expectedAgentsCount, actualAgentsCount)
-}
+		if err != nil {
+			t.Fatalf("Cannot retrieve the number of agents that were deployed: %v", err)
+		}
+
+		if expectedAgentsCount != actualAgentsCount {
+			t.Fatalf("Test failed. Expected number of agents is %d. Actual number of agents is %d", expectedAgentsCount, actualAgentsCount)
+		}
 	})
 }
 

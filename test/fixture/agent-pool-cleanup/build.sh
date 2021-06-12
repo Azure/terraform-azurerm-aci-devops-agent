@@ -13,5 +13,8 @@ do
   [[ $created == 'false' ]] && break
 done
 
+# add wait time for role propagation
+sleep 60
+
 az configure --defaults acr=$acr_name
 az acr build -t "aci-devops-agent:0.2-linux" linux  >> acr.txt

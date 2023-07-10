@@ -30,22 +30,6 @@ locals {
 
 # Linux Agents - deployed only if variable linux_agents_configuration.count > 0
 
-resource "azurerm_network_profile" "linux_network_profile" {
-  count               = var.enable_vnet_integration ? var.linux_agents_configuration.count : 0
-  name                = "linuxnetprofile${count.index}"
-  location            = var.location
-  resource_group_name = var.create_resource_group ? azurerm_resource_group.rg[0].name : data.azurerm_resource_group.rg[0].name
-
-  container_network_interface {
-    name = "linuxnic${count.index}"
-
-    ip_configuration {
-      name      = "linuxip${count.index}"
-      subnet_id = data.azurerm_subnet.subnet[0].id
-    }
-  }
-}
-
 resource "azurerm_container_group" "linux-container-group" {
   count               = var.linux_agents_configuration.count
   name                = "${var.linux_agents_configuration.agent_name_prefix}-${count.index}"
@@ -53,7 +37,7 @@ resource "azurerm_container_group" "linux-container-group" {
   resource_group_name = var.create_resource_group ? azurerm_resource_group.rg[0].name : data.azurerm_resource_group.rg[0].name
   ip_address_type     = var.enable_vnet_integration ? "Private" : "Public"
   os_type             = "Linux"
-  network_profile_id  = var.enable_vnet_integration ? azurerm_network_profile.linux_network_profile[count.index].id : null
+  subnet_ids          = var.enable_vnet_integration ? [data.azurerm_subnet.subnet[0].id] : null
 
   container {
     name   = "${var.linux_agents_configuration.agent_name_prefix}-${count.index}"
@@ -112,25 +96,18 @@ resource "azurerm_container_group" "linux-container-group" {
       identity_ids = var.linux_agents_configuration.user_assigned_identity_ids
     }
   }
-}
 
-# Windows Agents - deployed only if variable windows_agents_configuration.count > 0
-
-resource "azurerm_network_profile" "windows_network_profile" {
-  count               = var.enable_vnet_integration ? var.windows_agents_configuration.count : 0
-  name                = "windowsnetprofile${count.index}"
-  location            = var.location
-  resource_group_name = var.create_resource_group ? azurerm_resource_group.rg[0].name : data.azurerm_resource_group.rg[0].name
-
-  container_network_interface {
-    name = "windowsnic${count.index}"
-
-    ip_configuration {
-      name      = "windowsip${count.index}"
-      subnet_id = data.azurerm_subnet.subnet[0].id
+  dynamic "dns_config" {
+    for_each = var.dns_config == null ? [] : [1]
+    content {
+      nameservers    = var.dns_config.nameservers
+      search_domains = var.dns_config.search_domains
+      options        = var.dns_config.options
     }
   }
 }
+
+# Windows Agents - deployed only if variable windows_agents_configuration.count > 0
 
 resource "azurerm_container_group" "windows-container-group" {
   count               = var.windows_agents_configuration.count
@@ -139,7 +116,7 @@ resource "azurerm_container_group" "windows-container-group" {
   resource_group_name = var.create_resource_group ? azurerm_resource_group.rg[0].name : data.azurerm_resource_group.rg[0].name
   ip_address_type     = var.enable_vnet_integration ? "Private" : "Public"
   os_type             = "Windows"
-  network_profile_id  = var.enable_vnet_integration ? azurerm_network_profile.windows_network_profile[count.index].id : null
+  subnet_ids          = var.enable_vnet_integration ? [data.azurerm_subnet.subnet[0].id] : null
 
   container {
     name   = "${var.windows_agents_configuration.agent_name_prefix}-${count.index}"

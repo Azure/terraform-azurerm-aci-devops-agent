@@ -322,7 +322,7 @@ We provide 2 ways to build, run, and test the module on a local development mach
 
 - [Ruby **(~> 2.3)**](https://www.ruby-lang.org/en/downloads/)
 - [Bundler **(~> 1.15)**](https://bundler.io/)
-- [Terraform **(~> 0.11.7)**](https://www.terraform.io/downloads.html)
+- [Terraform **(~> 1.3)**](https://www.terraform.io/downloads.html)
 - [Golang **(~> 1.12.3)**](https://golang.org/dl/)
 
 #### Environment setup

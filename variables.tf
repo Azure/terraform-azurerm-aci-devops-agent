@@ -108,3 +108,13 @@ variable "image_registry_credential" {
     server                    = ""
   }
 }
+
+variable "dns_config" {
+  type = object({
+    nameservers    = list(string),
+    search_domains = optional(list(string))
+    options        = optional(list(string))
+  })
+  description = "(Optional) The DNS config information for a container group."
+  default = null
+}

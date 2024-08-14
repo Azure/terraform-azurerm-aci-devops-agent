@@ -97,6 +97,15 @@ resource "azurerm_container_group" "linux-container-group" {
       identity_ids = var.linux_agents_configuration.user_assigned_identity_ids
     }
   }
+
+  dynamic "dns_config" {
+    for_each = var.dns_config == null ? [] : [1]
+    content {
+      nameservers    = var.dns_config.nameservers
+      search_domains = var.dns_config.search_domains
+      options        = var.dns_config.options
+    }
+  }
 }
 
 # Windows Agents - deployed only if variable windows_agents_configuration.count > 0

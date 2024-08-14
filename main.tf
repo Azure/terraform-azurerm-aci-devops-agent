@@ -66,9 +66,10 @@ resource "azurerm_container_group" "linux-container-group" {
   dynamic "image_registry_credential" {
     for_each = var.image_registry_credential.server == "" ? [] : [1]
     content {
-      username = var.image_registry_credential.username
-      password = var.image_registry_credential.password
-      server   = var.image_registry_credential.server
+      user_assigned_identity_id = var.image_registry_credential.user_assigned_identity_id
+      username                  = var.image_registry_credential.username
+      password                  = var.image_registry_credential.password
+      server                    = var.image_registry_credential.server
     }
   }
 
@@ -144,9 +145,10 @@ resource "azurerm_container_group" "windows-container-group" {
   dynamic "image_registry_credential" {
     for_each = var.image_registry_credential.server == "" ? [] : [1]
     content {
-      username = var.image_registry_credential.username
-      password = var.image_registry_credential.password
-      server   = var.image_registry_credential.server
+      user_assigned_identity_id = var.image_registry_credential.user_assigned_identity_id
+      username                  = var.image_registry_credential.username
+      password                  = var.image_registry_credential.password
+      server                    = var.image_registry_credential.server
     }
   }
 }

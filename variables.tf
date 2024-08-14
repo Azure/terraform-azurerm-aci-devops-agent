@@ -98,15 +98,14 @@ variable "windows_agents_configuration" {
 
 variable "image_registry_credential" {
   type = object({
-    username = string,
-    password = string,
-    server   = string
+    user_assigned_identity_id = optional(string),
+    username                  = optional(string),
+    password                  = optional(string),
+    server                    = string
   })
   description = "(Optional) The credentials to use to connect to the Docker private registry where agent images are stored."
   default = {
-    username = "",
-    password = "",
-    server   = ""
+    server                    = ""
   }
 }
 

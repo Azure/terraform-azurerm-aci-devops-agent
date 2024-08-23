@@ -98,15 +98,23 @@ variable "windows_agents_configuration" {
 
 variable "image_registry_credential" {
   type = object({
-    username = string,
-    password = string,
-    server   = string
+    username                  = optional(string, ""),
+    password                  = optional(string, ""),
+    server                    = string,
+    user_assigned_identity_id = optional(string, ""),
   })
   description = "(Optional) The credentials to use to connect to the Docker private registry where agent images are stored."
   default = {
-    username = "",
-    password = "",
-    server   = ""
+    server = "",
+  }
+
+  validation {
+    condition = (
+      var.image_registry_credential.server == "" ||
+      (var.image_registry_credential.username != "" && var.image_registry_credential.password != "") ||
+      var.image_registry_credential.user_assigned_identity_id != ""
+    )
+    error_message = "Either a username and a password or a user assigned identity ID must be provided to connect to the Docker private registry."
   }
 }
 
@@ -117,5 +125,5 @@ variable "dns_config" {
     options        = optional(list(string))
   })
   description = "(Optional) The DNS config information for a container group."
-  default = null
+  default     = null
 }

@@ -63,12 +63,21 @@ resource "azurerm_container_group" "linux-container-group" {
   }
 
   # if an image registry server has been specified, then generate the image_registry_credential block.
+  # For a credential with a username and a password
   dynamic "image_registry_credential" {
-    for_each = var.image_registry_credential.server == "" ? [] : [1]
+    for_each = var.image_registry_credential.server != "" && var.image_registry_credential.user_assigned_identity_id == "" ? [1] : []
     content {
       username = var.image_registry_credential.username
       password = var.image_registry_credential.password
       server   = var.image_registry_credential.server
+    }
+  }
+  # For a credential with an identity ID
+  dynamic "image_registry_credential" {
+    for_each = var.image_registry_credential.server != "" && var.image_registry_credential.user_assigned_identity_id != "" ? [1] : []
+    content {
+      server                    = var.image_registry_credential.server
+      user_assigned_identity_id = var.image_registry_credential.user_assigned_identity_id
     }
   }
 
@@ -141,12 +150,28 @@ resource "azurerm_container_group" "windows-container-group" {
   }
 
   # if an image registry server has been specified, then generate the image_registry_credential block.
+  # For a credential with a username and a password
   dynamic "image_registry_credential" {
-    for_each = var.image_registry_credential.server == "" ? [] : [1]
+    for_each = (
+      (
+        var.image_registry_credential.server != "" &&
+        var.image_registry_credential.username != "" &&
+        var.image_registry_credential.password != ""
+      )
+      ? [1] : []
+    )
     content {
       username = var.image_registry_credential.username
       password = var.image_registry_credential.password
       server   = var.image_registry_credential.server
+    }
+  }
+  # For a credential with an identity ID
+  dynamic "image_registry_credential" {
+    for_each = var.image_registry_credential.server != "" && var.image_registry_credential.user_assigned_identity_id != "" ? [1] : []
+    content {
+      server                    = var.image_registry_credential.server
+      user_assigned_identity_id = var.image_registry_credential.user_assigned_identity_id
     }
   }
 }
